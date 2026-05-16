@@ -2,12 +2,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA-EC-ojtjgbyHveWl5hrK_QHZj0_UYR1U",
-  authDomain: "sutdy-mri.firebaseapp.com",
-  projectId: "sutdy-mri",
-  storageBucket: "sutdy-mri.firebasestorage.app",
-  messagingSenderId: "545750822895",
-  appId: "1:545750822895:web:ed90771306d29513f6d01a"
+  apiKey: "AIzaSyC-Qon2VZv-heyBTBYLCrpwC_C5MDMrNws",
+  authDomain: "study-mri.firebaseapp.com",
+  projectId: "study-mri",
+  storageBucket: "study-mri.firebasestorage.app",
+  messagingSenderId: "231073050806",
+  appId: "1:231073050806:web:7d68cdc26e940b54cd7617"
 };
 
 const app = initializeApp(firebaseConfig);

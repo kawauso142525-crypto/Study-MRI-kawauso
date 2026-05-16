@@ -1,293 +1,69 @@
-let currentFileName = "";
+let currentFileName = "default";
 
 let tableData = [
   ["項目", "列1"],
-  ["データ1", ""]
+  ["データ", ""]
 ];
 
-const fileSelect =
-  document.getElementById("fileSelect");
+async function init() {
+  await saveFile(currentFileName, tableData);
+  await refreshFiles();
+  renderTable(tableData);
+}
 
-const newFileButton =
-  document.getElementById("newFileButton");
+async function refreshFiles() {
+  const fileNames = await getFileNames();
+  const select = document.getElementById("fileSelect");
 
-const deleteFileButton =
-  document.getElementById(
-    "deleteFileButton"
-  );
+  select.innerHTML = "";
 
-const addRowButton =
-  document.getElementById("addRowButton");
-
-const addColumnButton =
-  document.getElementById("addColumnButton");
-
-const saveButton =
-  document.getElementById("saveButton");
-
-const exportButton =
-  document.getElementById("exportButton");
-
-const importInput =
-  document.getElementById("importInput");
-
-async function refreshFileSelect() {
-
-  const fileNames =
-    await getFileNames();
-
-  fileSelect.innerHTML = "";
-
-  fileNames.forEach((fileName) => {
-
-    const option =
-      document.createElement("option");
-
-    option.value = fileName;
-
-    option.textContent = fileName;
-
-    fileSelect.appendChild(option);
+  fileNames.forEach(name => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
   });
 
-  if (currentFileName) {
-
-    fileSelect.value = currentFileName;
-  }
+  select.value = currentFileName;
 }
 
-async function loadCurrentFile() {
+document.getElementById("newFileButton").onclick = async () => {
+  const name = prompt("ファイル名");
+  if (!name) return;
 
-  const data =
-    await loadFile(currentFileName);
+  tableData = [["項目", "列1"], ["", ""]];
 
-  if (data) {
+  await saveFile(name, tableData);
+  currentFileName = name;
 
-    tableData = data;
-  }
-
+  await refreshFiles();
   renderTable(tableData);
-}
+};
 
-newFileButton.addEventListener(
-  "click",
-  async () => {
+document.getElementById("deleteFileButton").onclick = async () => {
+  await deleteFile(currentFileName);
+  await refreshFiles();
+};
 
-    const fileName =
-      prompt(
-        "ファイル名を入力してください"
-      );
+document.getElementById("saveButton").onclick = async () => {
+  await saveFile(currentFileName, tableData);
+  alert("保存完了");
+};
 
-    if (!fileName) return;
-
-    const defaultData = [
-      ["項目", "列1"],
-      ["データ1", ""]
-    ];
-
-    await saveFile(
-      fileName,
-      defaultData
-    );
-
-    currentFileName = fileName;
-
-    await refreshFileSelect();
-
-    await loadCurrentFile();
-  }
-);
-
-deleteFileButton.addEventListener(
-  "click",
-  async () => {
-
-    if (
-      !confirm(
-        "このファイルを削除しますか？"
-      )
-    ) {
-      return;
-    }
-
-    deleteFile(currentFileName);
-
-    const fileNames =
-      await getFileNames();
-
-    if (fileNames.length === 0) {
-
-      currentFileName = "default";
-
-      tableData = [
-        ["項目", "列1"],
-        ["データ1", ""]
-      ];
-
-      await saveFile(
-        currentFileName,
-        tableData
-      );
-    }
-    else {
-
-      currentFileName =
-        fileNames[0];
-
-      tableData =
-        await loadFile(
-          currentFileName
-        );
-    }
-
-    await refreshFileSelect();
-
-    renderTable(tableData);
-  }
-);
-
-fileSelect.addEventListener(
-  "change",
-  async () => {
-
-    currentFileName =
-      fileSelect.value;
-
-    await loadCurrentFile();
-  }
-);
-
-addRowButton.addEventListener(
-  "click",
-  () => {
-
-    addNewRow(tableData);
-
-    renderTable(tableData);
-  }
-);
-
-addColumnButton.addEventListener(
-  "click",
-  () => {
-
-    addNewColumn(tableData);
-
-    renderTable(tableData);
-  }
-);
-
-saveButton.addEventListener(
-  "click",
-  async () => {
-
-    await saveFile(
-      currentFileName,
-      tableData
-    );
-
-    alert("保存しました");
-  }
-);
-
-exportButton.addEventListener(
-  "click",
-  () => {
-
-    const dataStr =
-      JSON.stringify(
-        tableData,
-        null,
-        2
-      );
-
-    const blob =
-      new Blob(
-        [dataStr],
-        {
-          type:
-            "application/json"
-        }
-      );
-
-    const url =
-      URL.createObjectURL(blob);
-
-    const a =
-      document.createElement("a");
-
-    a.href = url;
-
-    a.download =
-      `${currentFileName}.json`;
-
-    a.click();
-
-    URL.revokeObjectURL(url);
-  }
-);
-
-importInput.addEventListener(
-  "change",
-  async (event) => {
-
-    const file =
-      event.target.files[0];
-
-    if (!file) return;
-
-    const reader =
-      new FileReader();
-
-    reader.onload =
-      async (e) => {
-
-        tableData =
-          JSON.parse(
-            e.target.result
-          );
-
-        renderTable(tableData);
-
-        await saveFile(
-          currentFileName,
-          tableData
-        );
-      };
-
-    reader.readAsText(file);
-  }
-);
-
-async function initializeApp() {
-
-  const fileNames =
-    await getFileNames();
-
-  if (fileNames.length === 0) {
-
-    currentFileName =
-      "default";
-
-    await saveFile(
-      currentFileName,
-      tableData
-    );
-  }
-  else {
-
-    currentFileName =
-      fileNames[0];
-
-    tableData =
-      await loadFile(
-        currentFileName
-      );
-  }
-
-  await refreshFileSelect();
-
+document.getElementById("addRowButton").onclick = () => {
+  addNewRow(tableData);
   renderTable(tableData);
-}
+};
 
-initializeApp();
+document.getElementById("addColumnButton").onclick = () => {
+  addNewColumn(tableData);
+  renderTable(tableData);
+};
+
+document.getElementById("fileSelect").onchange = async (e) => {
+  currentFileName = e.target.value;
+  tableData = await loadFile(currentFileName);
+  renderTable(tableData);
+};
+
+init();

@@ -1,163 +1,62 @@
-const STORAGE_KEY =
-  "multiFileTableData";
+const STORAGE_KEY = "multiFileTableData";
 
 function loadAllFiles() {
-
-  const data =
-    localStorage.getItem(
-      STORAGE_KEY
-    );
-
-  return data
-    ? JSON.parse(data)
-    : {};
+  const data = localStorage.getItem(STORAGE_KEY);
+  return data ? JSON.parse(data) : {};
 }
 
 function saveAllFiles(allFiles) {
-
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(allFiles)
-  );
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(allFiles));
 }
 
 async function loadFile(fileName) {
-
-  const allFiles =
-    loadAllFiles();
+  const allFiles = loadAllFiles();
 
   if (allFiles[fileName]) {
-
     return allFiles[fileName];
   }
 
-  try {
+  const { doc, getDoc } = window.firebaseFunctions;
 
-    const {
-      doc,
-      getDoc
-    } = window.firebaseFunctions;
+  const snap = await getDoc(
+    doc(window.firebaseDB, "files", fileName)
+  );
 
-    const docRef =
-      doc(
-        window.firebaseDB,
-        "files",
-        fileName
-      );
-
-    const docSnap =
-      await getDoc(docRef);
-
-    if (docSnap.exists()) {
-
-      const data =
-        docSnap.data().tableData;
-
-      allFiles[fileName] = data;
-
-      saveAllFiles(allFiles);
-
-      return data;
-    }
-  }
-  catch (error) {
-
-    console.error(error);
+  if (snap.exists()) {
+    const data = snap.data().tableData;
+    allFiles[fileName] = data;
+    saveAllFiles(allFiles);
+    return data;
   }
 
   return null;
 }
 
-async function saveFile(
-  fileName,
-  data
-) {
-
-  const allFiles =
-    loadAllFiles();
-
+async function saveFile(fileName, data) {
+  const allFiles = loadAllFiles();
   allFiles[fileName] = data;
-
   saveAllFiles(allFiles);
 
-  try {
+  const { doc, setDoc } = window.firebaseFunctions;
 
-    const {
-      doc,
-      setDoc
-    } = window.firebaseFunctions;
+  await setDoc(
+    doc(window.firebaseDB, "files", fileName),
+    { tableData: data }
+  );
+}
 
-    await setDoc(
-      doc(
-        window.firebaseDB,
-        "files",
-        fileName
-      ),
-      {
-        tableData: data
-      }
-    );
-  }
-  catch (error) {
+async function deleteFile(fileName) {
+  const allFiles = loadAllFiles();
+  delete allFiles[fileName];
+  saveAllFiles(allFiles);
 
-    console.error(error);
-  }
+  const { doc, deleteDoc } = window.firebaseFunctions;
+
+  await deleteDoc(
+    doc(window.firebaseDB, "files", fileName)
+  );
 }
 
 async function getFileNames() {
-
-  const localFiles =
-    Object.keys(
-      loadAllFiles()
-    );
-
-  try {
-
-    const {
-      collection,
-      getDocs
-    } = await import(
-      "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
-    );
-
-    const querySnapshot =
-      await getDocs(
-        collection(
-          window.firebaseDB,
-          "files"
-        )
-      );
-
-    const firebaseFiles = [];
-
-    querySnapshot.forEach((doc) => {
-
-      firebaseFiles.push(doc.id);
-    });
-
-    const mergedFiles = [
-      ...new Set([
-        ...localFiles,
-        ...firebaseFiles
-      ])
-    ];
-
-    return mergedFiles;
-  }
-  catch (error) {
-
-    console.error(error);
-
-    return localFiles;
-  }
-}
-
-function deleteFile(fileName) {
-
-  const allFiles =
-    loadAllFiles();
-
-  delete allFiles[fileName];
-
-  saveAllFiles(allFiles);
+  return Object.keys(loadAllFiles());
 }

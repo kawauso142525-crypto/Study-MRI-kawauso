@@ -1,5 +1,4 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
 import {
   getFirestore,
   doc,
@@ -19,11 +18,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/*
-  グローバル公開（他JSから使うため）
-*/
+// グローバル公開
 window.firebaseDB = db;
-
 window.firebaseFunctions = {
   doc,
   setDoc,
@@ -31,4 +27,4 @@ window.firebaseFunctions = {
   deleteDoc
 };
 
-console.log("Firebase initialized:", db);
+console.log("Firebase ready");

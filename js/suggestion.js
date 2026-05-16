@@ -1,56 +1,33 @@
-async function getSuggestions(rowIndex) {
+function getSuggestions(rowIndex) {
+  const saved = localStorage.getItem("suggestions");
 
-  const { doc, getDoc } = window.firebaseFunctions;
+  const suggestions = saved ? JSON.parse(saved) : {
+    row1: [],
+    row2: [],
+    row3: [],
+    shared: []
+  };
 
-  const docRef = doc(
-    window.firebaseDB,
-    "suggestions",
-    "global"
-  );
+  if (rowIndex === 1) return suggestions.row1;
+  if (rowIndex === 2) return suggestions.row2;
+  if (rowIndex === 3) return suggestions.row3;
 
-  const snap = await getDoc(docRef);
-
-  const data = snap.exists()
-    ? snap.data()
-    : {
-        row1: [],
-        row2: [],
-        row3: [],
-        shared: []
-      };
-
-  if (rowIndex === 1) return data.row1;
-  if (rowIndex === 2) return data.row2;
-  if (rowIndex === 3) return data.row3;
-
-  return data.shared;
+  return suggestions.shared;
 }
 
-async function saveSuggestion(rowIndex, value) {
-
+function saveSuggestion(rowIndex, value) {
   if (!value.trim()) return;
 
-  const { doc, getDoc, setDoc } = window.firebaseFunctions;
+  const saved = localStorage.getItem("suggestions");
 
-  const docRef = doc(
-    window.firebaseDB,
-    "suggestions",
-    "global"
-  );
-
-  const snap = await getDoc(docRef);
-
-  let suggestions = snap.exists()
-    ? snap.data()
-    : {
-        row1: [],
-        row2: [],
-        row3: [],
-        shared: []
-      };
+  const suggestions = saved ? JSON.parse(saved) : {
+    row1: [],
+    row2: [],
+    row3: [],
+    shared: []
+  };
 
   let target;
-
   if (rowIndex === 1) target = suggestions.row1;
   else if (rowIndex === 2) target = suggestions.row2;
   else if (rowIndex === 3) target = suggestions.row3;
@@ -60,5 +37,5 @@ async function saveSuggestion(rowIndex, value) {
     target.push(value);
   }
 
-  await setDoc(docRef, suggestions);
+  localStorage.setItem("suggestions", JSON.stringify(suggestions));
 }

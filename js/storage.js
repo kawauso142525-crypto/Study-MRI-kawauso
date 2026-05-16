@@ -1,112 +1,45 @@
-function saveTableData() {
+const STORAGE_KEY = "multiFileTableData";
 
-  const table = document.getElementById("taskTable");
+function loadAllFiles() {
 
-  const data = [];
+  const data = localStorage.getItem(STORAGE_KEY);
 
-  for (let i = 0; i < table.rows.length; i++) {
-
-    const row = table.rows[i];
-
-    const rowData = [];
-
-    for (let j = 0; j < row.cells.length; j++) {
-
-      rowData.push({
-        text: row.cells[j].textContent,
-        tag: row.cells[j].tagName,
-        className: row.cells[j].className
-      });
-    }
-
-    data.push(rowData);
-  }
-
-  localStorage.setItem("taskData", JSON.stringify(data));
+  return data ? JSON.parse(data) : {};
 }
 
-function loadTableData() {
+function saveAllFiles(allFiles) {
 
-  const savedData = localStorage.getItem("taskData");
-
-  if (!savedData) return;
-
-  const data = JSON.parse(savedData);
-
-  const table = document.getElementById("taskTable");
-
-  table.innerHTML = "";
-
-  data.forEach((rowData) => {
-
-    const row = table.insertRow();
-
-    rowData.forEach((cellData) => {
-
-      const cell = document.createElement(cellData.tag);
-
-      cell.textContent = cellData.text;
-
-      if (cellData.className) {
-        cell.className = cellData.className;
-      }
-
-      row.appendChild(cell);
-    });
-  });
-}
-
-function exportJson() {
-
-  const taskData =
-    localStorage.getItem("taskData");
-
-  const suggestions =
-    localStorage.getItem("suggestions");
-
-  const backupData = {
-    taskData: JSON.parse(taskData),
-    suggestions: JSON.parse(suggestions)
-  };
-
-  const blob = new Blob(
-    [JSON.stringify(backupData, null, 2)],
-    { type: "application/json" }
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(allFiles)
   );
-
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-
-  a.href = url;
-
-  a.download = "task-backup.json";
-
-  a.click();
-
-  URL.revokeObjectURL(url);
 }
 
-function importJson(file) {
+function loadFile(fileName) {
 
-  const reader = new FileReader();
+  const allFiles = loadAllFiles();
 
-  reader.onload = function(event) {
+  return allFiles[fileName] || null;
+}
 
-    const data = JSON.parse(event.target.result);
+function saveFile(fileName, data) {
 
-    localStorage.setItem(
-      "taskData",
-      JSON.stringify(data.taskData)
-    );
+  const allFiles = loadAllFiles();
 
-    localStorage.setItem(
-      "suggestions",
-      JSON.stringify(data.suggestions)
-    );
+  allFiles[fileName] = data;
 
-    location.reload();
-  };
+  saveAllFiles(allFiles);
+}
 
-  reader.readAsText(file);
+function getFileNames() {
+
+  return Object.keys(loadAllFiles());
+}
+function deleteFile(fileName) {
+
+  const allFiles = loadAllFiles();
+
+  delete allFiles[fileName];
+
+  saveAllFiles(allFiles);
 }

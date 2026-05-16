@@ -1,215 +1,210 @@
-function initializeTableEvents() {
+function renderTable(tableData) {
 
-  const table = document.getElementById("taskTable");
+  const tableContainer =
+    document.getElementById(
+      "tableContainer"
+    );
 
-  table.addEventListener("click", (event) => {
+  tableContainer.innerHTML = "";
 
-    const cell = event.target;
+  const wrapper =
+    document.createElement("div");
 
-    const isEditable =
-      cell.classList.contains("editable");
+  wrapper.className = "table-wrapper";
 
-    const isEditableHeader =
-      cell.classList.contains("editable-header");
+  const table =
+    document.createElement("table");
 
-    if (!isEditable && !isEditableHeader) return;
+  tableData.forEach(
+    (rowData, rowIndex) => {
 
-    if (cell.querySelector("input")) return;
+      const tr =
+        document.createElement("tr");
 
-    startEditing(cell);
-  });
-}
+      rowData.forEach(
+        (cellData, colIndex) => {
 
-function startEditing(cell) {
+          const cell =
+            rowIndex === 0
+              ? document.createElement("th")
+              : document.createElement("td");
 
-  const oldValue = cell.textContent;
+          const input =
+            document.createElement("input");
 
-  const rowIndex = cell.parentElement.rowIndex;
+          input.value = cellData;
 
-  const input = document.createElement("input");
+          input.addEventListener(
+            "change",
+            (event) => {
 
-  input.value = oldValue;
+              tableData[rowIndex][colIndex] =
+                event.target.value;
 
-  cell.textContent = "";
+              saveFile(
+                currentFileName,
+                tableData
+              );
+            }
+          );
 
-  cell.appendChild(input);
+          cell.appendChild(input);
 
-  showSuggestions(cell, input, rowIndex);
+          tr.appendChild(cell);
+        }
+      );
 
-  input.focus();
+      if (rowIndex !== 0) {
 
-  input.addEventListener("keydown", (e) => {
+        const deleteCell =
+          document.createElement("td");
 
-    if (e.key === "Enter") {
+        const deleteButton =
+          document.createElement("button");
 
-      saveCell(cell, input.value, rowIndex);
+        deleteButton.textContent = "削除";
+
+        deleteButton.className =
+          "delete-row-button";
+
+        deleteButton.addEventListener(
+          "click",
+          () => {
+
+            deleteRow(
+              tableData,
+              rowIndex
+            );
+
+            renderTable(tableData);
+          }
+        );
+
+        deleteCell.appendChild(
+          deleteButton
+        );
+
+        tr.appendChild(deleteCell);
+      }
+
+      table.appendChild(tr);
     }
-  });
+  );
 
-  input.addEventListener("blur", () => {
+  const deleteColumnRow =
+    document.createElement("tr");
 
-    setTimeout(() => {
+  tableData[0].forEach(
+    (_, colIndex) => {
 
-      saveCell(cell, input.value, rowIndex);
+      const td =
+        document.createElement("td");
 
-    }, 200);
-  });
-}
+      if (colIndex !== 0) {
 
-function showSuggestions(cell, input, rowIndex) {
+        const button =
+          document.createElement("button");
 
-  const suggestions = getSuggestions(rowIndex);
+        button.textContent = "列削除";
 
-  const oldBox = cell.querySelector(".suggestion-box");
+        button.className =
+          "delete-column-button";
 
-  if (oldBox) oldBox.remove();
+        button.addEventListener(
+          "click",
+          () => {
 
-  const box = document.createElement("div");
+            deleteColumn(
+              tableData,
+              colIndex
+            );
 
-  box.classList.add("suggestion-box");
+            renderTable(tableData);
+          }
+        );
 
-  cell.appendChild(box);
+        td.appendChild(button);
+      }
 
-  function renderSuggestions() {
-
-    box.innerHTML = "";
-
-    const keyword = input.value.toLowerCase();
-
-    const filtered = suggestions.filter((item) => {
-
-      return item.toLowerCase().includes(keyword);
-
-    });
-
-    filtered.forEach((item) => {
-
-      const div = document.createElement("div");
-
-      div.textContent = item;
-
-      div.classList.add("suggestion-item");
-
-      div.addEventListener("click", () => {
-
-        input.value = item;
-
-        box.remove();
-
-        input.focus();
-      });
-
-      box.appendChild(div);
-    });
-
-    if (filtered.length === 0) {
-
-      box.style.display = "none";
-
-    } else {
-
-      box.style.display = "block";
+      deleteColumnRow.appendChild(td);
     }
-  }
+  );
 
-  renderSuggestions();
+  table.appendChild(deleteColumnRow);
 
-  input.addEventListener("input", () => {
+  wrapper.appendChild(table);
 
-    renderSuggestions();
+  tableContainer.appendChild(wrapper);
+}
+
+function addNewRow(tableData) {
+
+  const columnCount =
+    tableData[0].length;
+
+  const newRow =
+    Array(columnCount).fill("");
+
+  newRow[0] =
+    `データ${tableData.length}`;
+
+  tableData.push(newRow);
+
+  saveFile(
+    currentFileName,
+    tableData
+  );
+}
+
+function addNewColumn(tableData) {
+
+  tableData.forEach(
+    (row, rowIndex) => {
+
+      if (rowIndex === 0) {
+
+        row.push(
+          `列${row.length}`
+        );
+      }
+      else {
+
+        row.push("");
+      }
+    }
+  );
+
+  saveFile(
+    currentFileName,
+    tableData
+  );
+}
+
+function deleteRow(
+  tableData,
+  rowIndex
+) {
+
+  tableData.splice(rowIndex, 1);
+
+  saveFile(
+    currentFileName,
+    tableData
+  );
+}
+
+function deleteColumn(
+  tableData,
+  colIndex
+) {
+
+  tableData.forEach((row) => {
+
+    row.splice(colIndex, 1);
   });
-}
 
-function saveCell(cell, value, rowIndex) {
-
-  cell.textContent = value;
-
-  saveSuggestion(rowIndex, value);
-
-  saveTableData();
-}
-
-function addNewColumn() {
-
-  const table = document.getElementById("taskTable");
-
-  const headerRow = table.rows[0];
-
-  const newColumnIndex = headerRow.cells.length;
-
-  const newHeader = document.createElement("th");
-
-  newHeader.textContent = `データ${newColumnIndex}`;
-
-  headerRow.appendChild(newHeader);
-
-  for (let i = 1; i < table.rows.length; i++) {
-
-    const cell = document.createElement("td");
-
-    cell.classList.add("editable");
-
-    cell.textContent = "";
-
-    table.rows[i].appendChild(cell);
-  }
-
-  saveTableData();
-}
-
-function addNewRow() {
-
-  const table = document.getElementById("taskTable");
-
-  const columnCount = table.rows[0].cells.length;
-
-  const row = table.insertRow();
-
-  const headerCell = document.createElement("th");
-
-  headerCell.textContent = "新項目";
-
-  headerCell.classList.add("editable-header");
-
-  row.appendChild(headerCell);
-
-  for (let i = 1; i < columnCount; i++) {
-
-    const cell = document.createElement("td");
-
-    cell.textContent = "";
-
-    cell.classList.add("editable");
-
-    row.appendChild(cell);
-  }
-
-  saveTableData();
-}
-
-function deleteLastColumn() {
-
-  const table = document.getElementById("taskTable");
-
-  const columnCount = table.rows[0].cells.length;
-
-  if (columnCount <= 2) return;
-
-  for (let i = 0; i < table.rows.length; i++) {
-
-    table.rows[i].deleteCell(columnCount - 1);
-  }
-
-  saveTableData();
-}
-
-function deleteLastRow() {
-
-  const table = document.getElementById("taskTable");
-
-  if (table.rows.length <= 2) return;
-
-  table.deleteRow(table.rows.length - 1);
-
-  saveTableData();
+  saveFile(
+    currentFileName,
+    tableData
+  );
 }

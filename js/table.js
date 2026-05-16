@@ -1,44 +1,58 @@
-function addCellEvents() {
+function initializeTableEvents() {
 
-  const editableCells = document.querySelectorAll(".editable");
+  const table = document.getElementById("taskTable");
 
-  editableCells.forEach((cell) => {
+  table.addEventListener("click", (event) => {
 
-    cell.addEventListener("click", () => {
+    const cell = event.target;
 
-      if (cell.querySelector("input")) return;
+    const isEditable =
+      cell.classList.contains("editable");
 
-      const oldValue = cell.textContent;
+    const isEditableHeader =
+      cell.classList.contains("editable-header");
 
-      const rowIndex = cell.parentElement.rowIndex;
+    if (!isEditable && !isEditableHeader) return;
 
-      const input = document.createElement("input");
+    if (cell.querySelector("input")) return;
 
-      input.value = oldValue;
+    startEditing(cell);
+  });
+}
 
-      cell.textContent = "";
+function startEditing(cell) {
 
-      cell.appendChild(input);
+  const oldValue = cell.textContent;
 
-      showSuggestions(cell, input, rowIndex);
+  const rowIndex = cell.parentElement.rowIndex;
 
-      input.focus();
+  const input = document.createElement("input");
 
-      input.addEventListener("keydown", (e) => {
+  input.value = oldValue;
 
-        if (e.key === "Enter") {
+  cell.textContent = "";
 
-          saveCell(cell, input.value, rowIndex);
-        }
-      });
+  cell.appendChild(input);
 
-      input.addEventListener("blur", () => {
+  showSuggestions(cell, input, rowIndex);
 
-        setTimeout(() => {
-          saveCell(cell, input.value, rowIndex);
-        }, 200);
-      });
-    });
+  input.focus();
+
+  input.addEventListener("keydown", (e) => {
+
+    if (e.key === "Enter") {
+
+      saveCell(cell, input.value, rowIndex);
+    }
+  });
+
+  input.addEventListener("blur", () => {
+
+    setTimeout(() => {
+
+      saveCell(cell, input.value, rowIndex);
+
+    }, 200);
   });
 }
 
@@ -54,27 +68,56 @@ function showSuggestions(cell, input, rowIndex) {
 
   box.classList.add("suggestion-box");
 
-  suggestions.forEach((item) => {
+  cell.appendChild(box);
 
-    const div = document.createElement("div");
+  function renderSuggestions() {
 
-    div.textContent = item;
+    box.innerHTML = "";
 
-    div.classList.add("suggestion-item");
+    const keyword = input.value.toLowerCase();
 
-    div.addEventListener("click", () => {
+    const filtered = suggestions.filter((item) => {
 
-      input.value = item;
+      return item.toLowerCase().includes(keyword);
 
-      box.remove();
-
-      input.focus();
     });
 
-    box.appendChild(div);
-  });
+    filtered.forEach((item) => {
 
-  cell.appendChild(box);
+      const div = document.createElement("div");
+
+      div.textContent = item;
+
+      div.classList.add("suggestion-item");
+
+      div.addEventListener("click", () => {
+
+        input.value = item;
+
+        box.remove();
+
+        input.focus();
+      });
+
+      box.appendChild(div);
+    });
+
+    if (filtered.length === 0) {
+
+      box.style.display = "none";
+
+    } else {
+
+      box.style.display = "block";
+    }
+  }
+
+  renderSuggestions();
+
+  input.addEventListener("input", () => {
+
+    renderSuggestions();
+  });
 }
 
 function saveCell(cell, value, rowIndex) {
@@ -84,9 +127,8 @@ function saveCell(cell, value, rowIndex) {
   saveSuggestion(rowIndex, value);
 
   saveTableData();
-
-  addCellEvents();
 }
+
 function addNewColumn() {
 
   const table = document.getElementById("taskTable");
@@ -95,14 +137,12 @@ function addNewColumn() {
 
   const newColumnIndex = headerRow.cells.length;
 
-  // ヘッダー追加
   const newHeader = document.createElement("th");
 
   newHeader.textContent = `データ${newColumnIndex}`;
 
   headerRow.appendChild(newHeader);
 
-  // 各行へセル追加
   for (let i = 1; i < table.rows.length; i++) {
 
     const cell = document.createElement("td");
@@ -114,7 +154,62 @@ function addNewColumn() {
     table.rows[i].appendChild(cell);
   }
 
-  addCellEvents();
+  saveTableData();
+}
+
+function addNewRow() {
+
+  const table = document.getElementById("taskTable");
+
+  const columnCount = table.rows[0].cells.length;
+
+  const row = table.insertRow();
+
+  const headerCell = document.createElement("th");
+
+  headerCell.textContent = "新項目";
+
+  headerCell.classList.add("editable-header");
+
+  row.appendChild(headerCell);
+
+  for (let i = 1; i < columnCount; i++) {
+
+    const cell = document.createElement("td");
+
+    cell.textContent = "";
+
+    cell.classList.add("editable");
+
+    row.appendChild(cell);
+  }
+
+  saveTableData();
+}
+
+function deleteLastColumn() {
+
+  const table = document.getElementById("taskTable");
+
+  const columnCount = table.rows[0].cells.length;
+
+  if (columnCount <= 2) return;
+
+  for (let i = 0; i < table.rows.length; i++) {
+
+    table.rows[i].deleteCell(columnCount - 1);
+  }
+
+  saveTableData();
+}
+
+function deleteLastRow() {
+
+  const table = document.getElementById("taskTable");
+
+  if (table.rows.length <= 2) return;
+
+  table.deleteRow(table.rows.length - 1);
 
   saveTableData();
 }

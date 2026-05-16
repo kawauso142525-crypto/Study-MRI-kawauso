@@ -15,46 +15,78 @@
   <h1>タスク管理</h1>
 
   <button id="addColumnButton">
-  ＋ データ追加
+    ＋ データ追加
   </button>
-  <table id="taskTable">
 
-    <tr>
-      <th></th>
-      <th>データ1</th>
-      <th>データ2</th>
-      <th>データ3</th>
-    </tr>
+  <button id="addRowButton">
+    ＋ 項目追加
+  </button>
 
-    <tr>
-      <th>対象</th>
-      <td class="editable">本</td>
-      <td class="editable">部屋</td>
-      <td class="editable">PC</td>
-    </tr>
+  <button id="deleteColumnButton">
+    － データ削除
+  </button>
 
-    <tr>
-      <th>タスク</th>
-      <td class="editable">読む</td>
-      <td class="editable">掃除</td>
-      <td class="editable">修理</td>
-    </tr>
+  <button id="deleteRowButton">
+    － 項目削除
+  </button>
 
-    <tr>
-      <th>状態</th>
-      <td class="editable">未着手</td>
-      <td class="editable">完了</td>
-      <td class="editable">進行中</td>
-    </tr>
+  <button id="exportButton">
+    JSON保存
+  </button>
 
-    <tr>
-      <th>タグ</th>
-      <td class="editable">趣味</td>
-      <td class="editable">家</td>
-      <td class="editable">仕事</td>
-    </tr>
+  <button id="importButton">
+    JSON読込
+  </button>
 
-  </table>
+  <input
+    type="file"
+    id="fileInput"
+    accept=".json"
+    style="display: none;"
+  />
+
+  <div class="table-container">
+
+    <table id="taskTable">
+
+      <tr>
+        <th></th>
+        <th>データ1</th>
+        <th>データ2</th>
+        <th>データ3</th>
+      </tr>
+
+      <tr>
+        <th class="editable-header">対象</th>
+        <td class="editable">本</td>
+        <td class="editable">部屋</td>
+        <td class="editable">PC</td>
+      </tr>
+
+      <tr>
+        <th class="editable-header">タスク</th>
+        <td class="editable">読む</td>
+        <td class="editable">掃除</td>
+        <td class="editable">修理</td>
+      </tr>
+
+      <tr>
+        <th class="editable-header">状態</th>
+        <td class="editable">未着手</td>
+        <td class="editable">完了</td>
+        <td class="editable">進行中</td>
+      </tr>
+
+      <tr>
+        <th class="editable-header">タグ</th>
+        <td class="editable">趣味</td>
+        <td class="editable">家</td>
+        <td class="editable">仕事</td>
+      </tr>
+
+    </table>
+
+  </div>
 
   <script src="js/storage.js"></script>
   <script src="js/suggestion.js"></script>

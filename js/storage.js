@@ -14,7 +14,8 @@ function saveTableData() {
 
       rowData.push({
         text: row.cells[j].textContent,
-        tag: row.cells[j].tagName
+        tag: row.cells[j].tagName,
+        className: row.cells[j].className
       });
     }
 
@@ -40,20 +41,72 @@ function loadTableData() {
 
     const row = table.insertRow();
 
-    rowData.forEach((cellData, index) => {
+    rowData.forEach((cellData) => {
 
       const cell = document.createElement(cellData.tag);
 
       cell.textContent = cellData.text;
 
-      if (
-        cellData.tag === "TD" &&
-        index !== 0
-      ) {
-        cell.classList.add("editable");
+      if (cellData.className) {
+        cell.className = cellData.className;
       }
 
       row.appendChild(cell);
     });
   });
+}
+
+function exportJson() {
+
+  const taskData =
+    localStorage.getItem("taskData");
+
+  const suggestions =
+    localStorage.getItem("suggestions");
+
+  const backupData = {
+    taskData: JSON.parse(taskData),
+    suggestions: JSON.parse(suggestions)
+  };
+
+  const blob = new Blob(
+    [JSON.stringify(backupData, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+
+  a.href = url;
+
+  a.download = "task-backup.json";
+
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+function importJson(file) {
+
+  const reader = new FileReader();
+
+  reader.onload = function(event) {
+
+    const data = JSON.parse(event.target.result);
+
+    localStorage.setItem(
+      "taskData",
+      JSON.stringify(data.taskData)
+    );
+
+    localStorage.setItem(
+      "suggestions",
+      JSON.stringify(data.suggestions)
+    );
+
+    location.reload();
+  };
+
+  reader.readAsText(file);
 }

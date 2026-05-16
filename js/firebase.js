@@ -12,7 +12,6 @@ const firebaseConfig = {
   apiKey: "AIzaSyC-Qon2VZv-heyBTBYLCrpwC_C5MDMrNws",
   authDomain: "study-mri.firebaseapp.com",
   projectId: "study-mri",
-  storageBucket: "study-mri.firebasestorage.app",
   messagingSenderId: "231073050806",
   appId: "1:231073050806:web:7d68cdc26e940b54cd7617"
 };

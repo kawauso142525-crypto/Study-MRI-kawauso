@@ -1,52 +1,64 @@
-function getSuggestions(rowIndex) {
+async function getSuggestions(rowIndex) {
 
-  const saved = localStorage.getItem("suggestions");
+  const { doc, getDoc } = window.firebaseFunctions;
 
-  let suggestions = saved ? JSON.parse(saved) : {
-    row1: [],
-    row2: [],
-    row3: [],
-    shared: []
-  };
+  const docRef = doc(
+    window.firebaseDB,
+    "suggestions",
+    "global"
+  );
 
-  if (rowIndex === 1) return suggestions.row1;
-  if (rowIndex === 2) return suggestions.row2;
-  if (rowIndex === 3) return suggestions.row3;
+  const snap = await getDoc(docRef);
 
-  return suggestions.shared;
+  const data = snap.exists()
+    ? snap.data()
+    : {
+        row1: [],
+        row2: [],
+        row3: [],
+        shared: []
+      };
+
+  if (rowIndex === 1) return data.row1;
+  if (rowIndex === 2) return data.row2;
+  if (rowIndex === 3) return data.row3;
+
+  return data.shared;
 }
 
-function saveSuggestion(rowIndex, value) {
+async function saveSuggestion(rowIndex, value) {
 
   if (!value.trim()) return;
 
-  const saved = localStorage.getItem("suggestions");
+  const { doc, getDoc, setDoc } = window.firebaseFunctions;
 
-  let suggestions = saved ? JSON.parse(saved) : {
-    row1: [],
-    row2: [],
-    row3: [],
-    shared: []
-  };
+  const docRef = doc(
+    window.firebaseDB,
+    "suggestions",
+    "global"
+  );
 
-  let targetArray;
+  const snap = await getDoc(docRef);
 
-  if (rowIndex === 1) {
-    targetArray = suggestions.row1;
-  }
-  else if (rowIndex === 2) {
-    targetArray = suggestions.row2;
-  }
-  else if (rowIndex === 3) {
-    targetArray = suggestions.row3;
-  }
-  else {
-    targetArray = suggestions.shared;
+  let suggestions = snap.exists()
+    ? snap.data()
+    : {
+        row1: [],
+        row2: [],
+        row3: [],
+        shared: []
+      };
+
+  let target;
+
+  if (rowIndex === 1) target = suggestions.row1;
+  else if (rowIndex === 2) target = suggestions.row2;
+  else if (rowIndex === 3) target = suggestions.row3;
+  else target = suggestions.shared;
+
+  if (!target.includes(value)) {
+    target.push(value);
   }
 
-  if (!targetArray.includes(value)) {
-    targetArray.push(value);
-  }
-
-  localStorage.setItem("suggestions", JSON.stringify(suggestions));
+  await setDoc(docRef, suggestions);
 }

@@ -55,10 +55,10 @@ function refreshFileSelect() {
   }
 }
 
-function loadCurrentFile() {
+async function loadCurrentFile() {
 
   const data =
-    loadFile(currentFileName);
+    await loadFile(currentFileName);
 
   if (data) {
 
@@ -70,7 +70,7 @@ function loadCurrentFile() {
 
 newFileButton.addEventListener(
   "click",
-  () => {
+  async () => {
 
     const fileName =
       prompt(
@@ -84,19 +84,22 @@ newFileButton.addEventListener(
       ["データ1", ""]
     ];
 
-    saveFile(fileName, defaultData);
+    await saveFile(
+      fileName,
+      defaultData
+    );
 
     currentFileName = fileName;
 
     refreshFileSelect();
 
-    loadCurrentFile();
+    await loadCurrentFile();
   }
 );
 
 deleteFileButton.addEventListener(
   "click",
-  () => {
+  async () => {
 
     if (
       !confirm(
@@ -120,7 +123,7 @@ deleteFileButton.addEventListener(
         ["データ1", ""]
       ];
 
-      saveFile(
+      await saveFile(
         currentFileName,
         tableData
       );
@@ -131,7 +134,9 @@ deleteFileButton.addEventListener(
         fileNames[0];
 
       tableData =
-        loadFile(currentFileName);
+        await loadFile(
+          currentFileName
+        );
     }
 
     refreshFileSelect();
@@ -142,12 +147,12 @@ deleteFileButton.addEventListener(
 
 fileSelect.addEventListener(
   "change",
-  () => {
+  async () => {
 
     currentFileName =
       fileSelect.value;
 
-    loadCurrentFile();
+    await loadCurrentFile();
   }
 );
 
@@ -173,9 +178,9 @@ addColumnButton.addEventListener(
 
 saveButton.addEventListener(
   "click",
-  () => {
+  async () => {
 
-    saveFile(
+    await saveFile(
       currentFileName,
       tableData
     );
@@ -188,18 +193,21 @@ exportButton.addEventListener(
   "click",
   () => {
 
-    const dataStr = JSON.stringify(
-      tableData,
-      null,
-      2
-    );
+    const dataStr =
+      JSON.stringify(
+        tableData,
+        null,
+        2
+      );
 
-    const blob = new Blob(
-      [dataStr],
-      {
-        type: "application/json"
-      }
-    );
+    const blob =
+      new Blob(
+        [dataStr],
+        {
+          type:
+            "application/json"
+        }
+      );
 
     const url =
       URL.createObjectURL(blob);
@@ -220,7 +228,7 @@ exportButton.addEventListener(
 
 importInput.addEventListener(
   "change",
-  (event) => {
+  async (event) => {
 
     const file =
       event.target.files[0];
@@ -230,42 +238,55 @@ importInput.addEventListener(
     const reader =
       new FileReader();
 
-    reader.onload = (e) => {
+    reader.onload =
+      async (e) => {
 
-      tableData =
-        JSON.parse(e.target.result);
+        tableData =
+          JSON.parse(
+            e.target.result
+          );
 
-      renderTable(tableData);
+        renderTable(tableData);
 
-      saveFile(
-        currentFileName,
-        tableData
-      );
-    };
+        await saveFile(
+          currentFileName,
+          tableData
+        );
+      };
 
     reader.readAsText(file);
   }
 );
 
-const fileNames = getFileNames();
+async function initializeApp() {
 
-if (fileNames.length === 0) {
+  const fileNames =
+    getFileNames();
 
-  currentFileName = "default";
+  if (fileNames.length === 0) {
 
-  saveFile(
-    currentFileName,
-    tableData
-  );
+    currentFileName =
+      "default";
+
+    await saveFile(
+      currentFileName,
+      tableData
+    );
+  }
+  else {
+
+    currentFileName =
+      fileNames[0];
+
+    tableData =
+      await loadFile(
+        currentFileName
+      );
+  }
+
+  refreshFileSelect();
+
+  renderTable(tableData);
 }
-else {
 
-  currentFileName = fileNames[0];
-
-  tableData =
-    loadFile(currentFileName);
-}
-
-refreshFileSelect();
-
-renderTable(tableData);
+initializeApp();

@@ -2,7 +2,7 @@ const STORAGE_KEY =
   "multiFileTableData";
 
 /* =========================
-   全ファイル取得
+   local全取得
 ========================= */
 function loadAllFiles() {
 
@@ -18,7 +18,7 @@ function loadAllFiles() {
 }
 
 /* =========================
-   全保存
+   local全保存
 ========================= */
 function saveAllFiles(allFiles) {
 
@@ -33,25 +33,16 @@ function saveAllFiles(allFiles) {
 }
 
 /* =========================
-   ファイル読み込み
-   🔥 Firestore優先
+   ファイル読込
 ========================= */
 async function loadFile(fileName) {
 
-  /* ログイン確認 */
   const user =
     window.firebaseAuth
       ?.currentUser;
 
-  if (!user) {
-
-    console.log(
-      "未ログイン"
-    );
-
+  if (!user)
     return null;
-
-  }
 
   const uid =
     user.uid;
@@ -63,7 +54,6 @@ async function loadFile(fileName) {
 
   try {
 
-    /* Firestore取得 */
     const snap =
       await getDoc(
 
@@ -83,17 +73,15 @@ async function loadFile(fileName) {
 
       );
 
-    /* Firestore存在 */
     if (snap.exists()) {
 
       const raw =
         snap.data().tableData;
 
-      /* JSON復元 */
       const data =
         JSON.parse(raw);
 
-      /* localStorage更新 */
+      /* local更新 */
       const allFiles =
         loadAllFiles();
 
@@ -101,10 +89,6 @@ async function loadFile(fileName) {
         data;
 
       saveAllFiles(allFiles);
-
-      console.log(
-        "Firestore読込成功"
-      );
 
       return data;
 
@@ -119,7 +103,7 @@ async function loadFile(fileName) {
 
   }
 
-  /* Firestoreになければlocal */
+  /* local fallback */
   const allFiles =
     loadAllFiles();
 
@@ -138,7 +122,7 @@ async function saveFile(
   data
 ) {
 
-  /* localStorage保存 */
+  /* local保存 */
   const allFiles =
     loadAllFiles();
 
@@ -147,20 +131,12 @@ async function saveFile(
 
   saveAllFiles(allFiles);
 
-  /* ログイン確認 */
   const user =
     window.firebaseAuth
       ?.currentUser;
 
-  if (!user) {
-
-    console.log(
-      "未ログイン"
-    );
-
+  if (!user)
     return;
-
-  }
 
   const uid =
     user.uid;
@@ -172,7 +148,6 @@ async function saveFile(
 
   try {
 
-    /* Firestore保存 */
     await setDoc(
 
       doc(
@@ -191,7 +166,7 @@ async function saveFile(
 
       {
 
-        /* 🔥 Nested arrays対策 */
+        /* Nested arrays対策 */
         tableData:
           JSON.stringify(data)
 
@@ -236,7 +211,6 @@ async function deleteFile(
   fileName
 ) {
 
-  /* local削除 */
   const allFiles =
     loadAllFiles();
 
@@ -244,7 +218,6 @@ async function deleteFile(
 
   saveAllFiles(allFiles);
 
-  /* ログイン確認 */
   const user =
     window.firebaseAuth
       ?.currentUser;
@@ -262,7 +235,6 @@ async function deleteFile(
 
   try {
 
-    /* Firestore削除 */
     await deleteDoc(
 
       doc(
@@ -281,10 +253,6 @@ async function deleteFile(
 
     );
 
-    console.log(
-      "Firestore削除成功"
-    );
-
   } catch (error) {
 
     console.error(
@@ -297,12 +265,64 @@ async function deleteFile(
 }
 
 /* =========================
-   ファイル一覧
+   Firestore一覧取得
 ========================= */
-function getFileNames() {
+async function getFileNames() {
 
-  return Object.keys(
-    loadAllFiles()
-  );
+  const user =
+    window.firebaseAuth
+      ?.currentUser;
+
+  if (!user)
+    return [];
+
+  const uid =
+    user.uid;
+
+  const {
+    collection,
+    getDocs
+  } = window.firebaseFunctions;
+
+  try {
+
+    const querySnapshot =
+      await getDocs(
+
+        collection(
+
+          window.firebaseDB,
+
+          "users",
+
+          uid,
+
+          "files"
+
+        )
+
+      );
+
+    const names = [];
+
+    querySnapshot.forEach(doc => {
+
+      names.push(doc.id);
+
+    });
+
+    return names;
+
+  } catch (error) {
+
+    console.error(
+      "getFileNames error:",
+      error
+    );
+
+    return [];
+
+  }
 
 }
+

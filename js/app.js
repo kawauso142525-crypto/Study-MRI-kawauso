@@ -1,5 +1,3 @@
-```javascript id="stable_appjs"
-
 let currentFileName = "default";
 
 let tableData = [];
@@ -303,5 +301,3 @@ document.addEventListener(
   }
 
 );
-
-```

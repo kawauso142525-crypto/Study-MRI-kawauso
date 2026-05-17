@@ -1,4 +1,3 @@
-```javascript
 function renderTable(tableData) {
 
   const container =
@@ -76,4 +75,3 @@ function addNewColumn(tableData) {
   });
 
 }
-```

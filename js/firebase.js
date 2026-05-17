@@ -1,4 +1,3 @@
-```javascript id="fixfirebasefull"
 import { initializeApp }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
@@ -73,4 +72,3 @@ window.firebaseFunctions = {
 };
 
 console.log("Firebase ready");
-```

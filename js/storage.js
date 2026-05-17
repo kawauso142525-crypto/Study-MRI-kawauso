@@ -1,4 +1,3 @@
-```javascript
 const STORAGE_KEY = "multiFileTableData";
 
 /* 全ファイル取得 */
@@ -152,4 +151,3 @@ function getFileNames() {
   );
 
 }
-```

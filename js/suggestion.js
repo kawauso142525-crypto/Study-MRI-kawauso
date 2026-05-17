@@ -1,4 +1,3 @@
-```javascript
 function getSuggestions(rowIndex) {
 
   const saved =
@@ -65,4 +64,3 @@ function saveSuggestion(rowIndex, value) {
     JSON.stringify(suggestions)
   );
 }
-```

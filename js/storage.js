@@ -18,12 +18,10 @@ function saveAllFiles(allFiles) {
 window.loadFile = async function (fileName) {
   const allFiles = loadAllFiles();
 
-  // ① ローカルにあれば優先
   if (allFiles[fileName]) {
     return allFiles[fileName];
   }
 
-  // ② Firestoreから取得
   try {
     const { doc, getDoc } = window.firebaseFunctions;
 
@@ -36,8 +34,6 @@ window.loadFile = async function (fileName) {
     }
 
     const data = snap.data();
-
-    // 安全に変換（nested array対策）
     const rows = (data.rows || []).map(r => r.cells || []);
 
     allFiles[fileName] = rows;
@@ -52,17 +48,15 @@ window.loadFile = async function (fileName) {
 };
 
 /* =========================
-   ファイル保存
+   ファイル保存（通常保存）
 ========================= */
 window.saveFile = async function (fileName, tableData) {
   try {
     const allFiles = loadAllFiles();
 
-    // ローカル保存
     allFiles[fileName] = tableData;
     saveAllFiles(allFiles);
 
-    // Firestore用に安全変換（重要）
     const safeData = {
       fileName,
       updatedAt: Date.now(),
@@ -82,6 +76,21 @@ window.saveFile = async function (fileName, tableData) {
   } catch (e) {
     console.error("saveFile error:", e);
   }
+};
+
+/* =========================
+   🔥 自動保存（新規追加）
+========================= */
+
+let autoSaveTimer = null;
+
+window.autoSaveFile = function (fileName, tableData, delay = 800) {
+  if (autoSaveTimer) clearTimeout(autoSaveTimer);
+
+  autoSaveTimer = setTimeout(async () => {
+    await window.saveFile(fileName, tableData);
+    console.log("Auto saved:", fileName);
+  }, delay);
 };
 
 /* =========================

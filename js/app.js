@@ -293,3 +293,41 @@ document.addEventListener(
   }
 
 );
+
+/* =========================
+   行削除
+========================= */
+document
+  .getElementById(
+    "deleteRowButton"
+  )
+  .onclick = () => {
+
+    deleteLastRow(
+      tableData
+    );
+
+    renderTable(
+      tableData
+    );
+
+  };
+
+/* =========================
+   列削除
+========================= */
+document
+  .getElementById(
+    "deleteColumnButton"
+  )
+  .onclick = () => {
+
+    deleteLastColumn(
+      tableData
+    );
+
+    renderTable(
+      tableData
+    );
+
+  };

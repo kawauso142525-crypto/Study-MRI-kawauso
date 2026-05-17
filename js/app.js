@@ -1,9 +1,20 @@
+```javascript id="stable_appjs"
+
 let currentFileName = "default";
 
 let tableData = [];
 
-/* ログイン */
+/* =========================
+   ログイン
+========================= */
 async function login() {
+
+  if (!window.firebaseAuthLib) {
+    console.error(
+      "firebaseAuthLib が未読み込み"
+    );
+    return;
+  }
 
   const auth =
     window.firebaseAuth;
@@ -11,17 +22,31 @@ async function login() {
   const provider =
     window.firebaseProvider;
 
-  const { signInWithPopup } =
-    window.firebaseAuthLib;
+  const {
+    signInWithPopup
+  } = window.firebaseAuthLib;
 
-  await signInWithPopup(
-    auth,
-    provider
-  );
+  try {
+
+    await signInWithPopup(
+      auth,
+      provider
+    );
+
+  } catch (error) {
+
+    console.error(
+      "ログインエラー:",
+      error
+    );
+
+  }
 
 }
 
-/* ログインボタン */
+/* =========================
+   ログインボタン
+========================= */
 document
   .getElementById("loginButton")
   .onclick = async () => {
@@ -30,53 +55,76 @@ document
 
   };
 
-/* 認証監視 */
-window.firebaseAuthLib.onAuthStateChanged(
+/* =========================
+   認証監視
+========================= */
+if (
+  window.firebaseAuthLib &&
+  window.firebaseAuth
+) {
 
-  window.firebaseAuth,
+  window.firebaseAuthLib
+    .onAuthStateChanged(
 
-  async (user) => {
+      window.firebaseAuth,
 
-    const userInfo =
-      document.getElementById(
-        "userInfo"
-      );
+      async (user) => {
 
-    if (!user) {
+        const userInfo =
+          document.getElementById(
+            "userInfo"
+          );
 
-      userInfo.textContent =
-        "未ログイン";
+        /* 未ログイン */
+        if (!user) {
 
-      return;
-    }
+          userInfo.textContent =
+            "未ログイン";
 
-    userInfo.textContent =
-      "ログイン中: " + user.email;
+          return;
+        }
 
-    console.log("ログイン:", user.uid);
+        /* ログイン成功 */
+        userInfo.textContent =
+          "ログイン中: " + user.email;
 
-    tableData =
-      await loadFile(currentFileName);
+        console.log(
+          "ログイン:",
+          user.uid
+        );
 
-    if (!tableData ||
-        !tableData.length) {
+        /* ファイル読込 */
+        tableData =
+          await loadFile(
+            currentFileName
+          );
 
-      tableData = [
-        ["項目", "列1"],
-        ["", ""]
-      ];
+        /* 初回 */
+        if (
+          !tableData ||
+          !tableData.length
+        ) {
 
-    }
+          tableData = [
+            ["項目", "列1"],
+            ["", ""]
+          ];
 
-    renderTable(tableData);
+        }
 
-    refreshFiles();
+        renderTable(tableData);
 
-  }
+        refreshFiles();
 
-);
+      }
 
-/* 初期化 */
+    );
+
+}
+
+/* =========================
+   初期化
+========================= */
 function init() {
 
   console.log("app start");
@@ -85,7 +133,9 @@ function init() {
 
 init();
 
-/* ファイル一覧 */
+/* =========================
+   ファイル一覧更新
+========================= */
 function refreshFiles() {
 
   const select =
@@ -118,19 +168,25 @@ function refreshFiles() {
 
 }
 
-/* 保存 */
+/* =========================
+   保存
+========================= */
 document
   .getElementById("saveButton")
-  .onclick = () => {
+  .onclick = async () => {
 
-    saveFile(
+    await saveFile(
       currentFileName,
       tableData
     );
 
+    console.log("保存完了");
+
   };
 
-/* 新規 */
+/* =========================
+   新規ファイル
+========================= */
 document
   .getElementById("newFileButton")
   .onclick = async () => {
@@ -148,7 +204,7 @@ document
     ];
 
     await saveFile(
-      name,
+      currentFileName,
       tableData
     );
 
@@ -158,7 +214,9 @@ document
 
   };
 
-/* 削除 */
+/* =========================
+   ファイル削除
+========================= */
 document
   .getElementById("deleteFileButton")
   .onclick = async () => {
@@ -167,9 +225,13 @@ document
       currentFileName
     );
 
+    refreshFiles();
+
   };
 
-/* 行追加 */
+/* =========================
+   行追加
+========================= */
 document
   .getElementById("addRowButton")
   .onclick = () => {
@@ -180,7 +242,9 @@ document
 
   };
 
-/* 列追加 */
+/* =========================
+   列追加
+========================= */
 document
   .getElementById("addColumnButton")
   .onclick = () => {
@@ -191,7 +255,9 @@ document
 
   };
 
-/* 切替 */
+/* =========================
+   ファイル切替
+========================= */
 document
   .getElementById("fileSelect")
   .onchange = async (e) => {
@@ -200,21 +266,42 @@ document
       e.target.value;
 
     tableData =
-      await loadFile(currentFileName);
+      await loadFile(
+        currentFileName
+      );
+
+    if (!tableData) {
+
+      tableData = [
+        ["項目", "列1"],
+        ["", ""]
+      ];
+
+    }
 
     renderTable(tableData);
 
   };
 
-/* 自動保存 */
+/* =========================
+   自動保存
+========================= */
 document.addEventListener(
-  "input",
-  () => {
 
-    autoSaveFile(
+  "input",
+
+  async () => {
+
+    if (!currentFileName)
+      return;
+
+    await autoSaveFile(
       currentFileName,
       tableData
     );
 
   }
+
 );
+
+```

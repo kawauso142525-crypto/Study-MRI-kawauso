@@ -1,4 +1,4 @@
-```javascript
+```javascript id="fixfirebasefull"
 import { initializeApp }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
@@ -50,6 +50,7 @@ window.firebaseAuth = auth;
 
 window.firebaseProvider = provider;
 
+/* Auth関数 */
 window.firebaseAuthLib = {
 
   signInWithPopup,
@@ -58,6 +59,7 @@ window.firebaseAuthLib = {
 
 };
 
+/* Firestore関数 */
 window.firebaseFunctions = {
 
   doc,

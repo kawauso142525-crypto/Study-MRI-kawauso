@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ja">
 
@@ -5,6 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>管理アプリ</title>
+
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -12,32 +14,49 @@
 
   <h1>管理アプリ</h1>
 
+  <!-- ログイン -->
+  <button id="loginButton">
+    Googleログイン
+  </button>
+
   <div id="userInfo"></div>
 
-  <!-- ファイル操作 -->
+  <!-- ファイル -->
   <div class="file-controls">
+
     <select id="fileSelect"></select>
 
-    <button id="newFileButton">＋ 新規ファイル</button>
-    <button id="deleteFileButton">－ ファイル削除</button>
+    <button id="newFileButton">
+      ＋ 新規ファイル
+    </button>
+
+    <button id="deleteFileButton">
+      － ファイル削除
+    </button>
+
   </div>
 
   <!-- 操作 -->
   <div class="controls">
-    <button id="addRowButton">＋ 項目追加</button>
-    <button id="addColumnButton">＋ 列追加</button>
-    <button id="saveButton">保存</button>
 
-    <input type="file" id="importInput" accept=".json">
+    <button id="addRowButton">
+      ＋ 項目追加
+    </button>
+
+    <button id="addColumnButton">
+      ＋ 列追加
+    </button>
+
+    <button id="saveButton">
+      保存
+    </button>
+
   </div>
 
   <!-- テーブル -->
   <div id="tableContainer"></div>
 
-  <!-- =========================
-       JS（重要：順番）
-  ========================== -->
-
+  <!-- JS -->
   <script type="module" src="js/firebase.js"></script>
 
   <script src="js/storage.js"></script>
@@ -49,3 +68,4 @@
 </body>
 
 </html>
+```

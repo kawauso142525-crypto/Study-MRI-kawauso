@@ -1,89 +1,155 @@
+```javascript
+const STORAGE_KEY = "multiFileTableData";
 
-function getUid() {
-  return window.firebaseAuth.currentUser?.uid || null;
+/* 全ファイル取得 */
+function loadAllFiles() {
+
+  const data =
+    localStorage.getItem(STORAGE_KEY);
+
+  return data
+    ? JSON.parse(data)
+    : {};
+
 }
 
-/* =========================
-   保存
-========================= */
-window.saveFile = async function (fileName, tableData) {
+/* 全保存 */
+function saveAllFiles(allFiles) {
 
-  const uid = getUid();
-  if (!uid) return;
-
-  const { doc, setDoc } = window.firebaseFunctions;
-
-  const data = {
-    fileName,
-    updatedAt: Date.now(),
-    rows: tableData.map((row, i) => ({
-      id: "row-" + i,
-      cells: row
-    }))
-  };
-
-  await setDoc(
-    doc(window.firebaseDB, "users", uid, "files", fileName),
-    data
-  );
-};
-
-/* =========================
-   読み込み
-========================= */
-window.loadFile = async function (fileName) {
-
-  const uid = getUid();
-  if (!uid) return [["項目", "列1"], ["", ""]];
-
-  const { doc, getDoc } = window.firebaseFunctions;
-
-  const snap = await getDoc(
-    doc(window.firebaseDB, "users", uid, "files", fileName)
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(allFiles)
   );
 
-  if (!snap.exists()) {
-    return [["項目", "列1"], ["", ""]];
+}
+
+/* ファイル読み込み */
+async function loadFile(fileName) {
+
+  const allFiles = loadAllFiles();
+
+  if (allFiles[fileName]) {
+    return allFiles[fileName];
   }
 
-  const data = snap.data();
+  const user =
+    window.firebaseAuth.currentUser;
 
-  return (data.rows || []).map(r => r.cells || []);
-};
+  if (!user) return null;
 
-/* =========================
-   削除
-========================= */
-window.deleteFile = async function (fileName) {
+  const uid = user.uid;
 
-  const uid = getUid();
-  if (!uid) return;
+  const { doc, getDoc } =
+    window.firebaseFunctions;
 
-  const { doc, deleteDoc } = window.firebaseFunctions;
+  const snap = await getDoc(
+    doc(
+      window.firebaseDB,
+      "users",
+      uid,
+      "files",
+      fileName
+    )
+  );
+
+  if (snap.exists()) {
+
+    const data = snap.data().tableData;
+
+    allFiles[fileName] = data;
+
+    saveAllFiles(allFiles);
+
+    return data;
+  }
+
+  return null;
+}
+
+/* 保存 */
+async function saveFile(fileName, data) {
+
+  const allFiles = loadAllFiles();
+
+  allFiles[fileName] = data;
+
+  saveAllFiles(allFiles);
+
+  const user =
+    window.firebaseAuth.currentUser;
+
+  if (!user) return;
+
+  const uid = user.uid;
+
+  const { doc, setDoc } =
+    window.firebaseFunctions;
+
+  await setDoc(
+
+    doc(
+      window.firebaseDB,
+      "users",
+      uid,
+      "files",
+      fileName
+    ),
+
+    {
+      tableData: data
+    }
+
+  );
+
+  console.log("saved");
+}
+
+/* 自動保存 */
+function autoSaveFile(fileName, data) {
+
+  saveFile(fileName, data);
+
+}
+
+/* 削除 */
+async function deleteFile(fileName) {
+
+  const allFiles = loadAllFiles();
+
+  delete allFiles[fileName];
+
+  saveAllFiles(allFiles);
+
+  const user =
+    window.firebaseAuth.currentUser;
+
+  if (!user) return;
+
+  const uid = user.uid;
+
+  const { doc, deleteDoc } =
+    window.firebaseFunctions;
 
   await deleteDoc(
-    doc(window.firebaseDB, "users", uid, "files", fileName)
-  );
-};
 
-/* =========================
-   一覧（簡易版）
-========================= */
-window.getFileNames = function () {
+    doc(
+      window.firebaseDB,
+      "users",
+      uid,
+      "files",
+      fileName
+    )
+
+  );
+
+}
+
+/* ファイル一覧 */
+function getFileNames() {
+
   return Object.keys(
-    JSON.parse(localStorage.getItem("multiFileTableData") || "{}")
+    loadAllFiles()
   );
-};
 
-/* =========================
-   自動保存
-========================= */
-let timer = null;
-
-window.autoSaveFile = function (fileName, tableData) {
-  clearTimeout(timer);
-
-  timer = setTimeout(() => {
-    window.saveFile(fileName, tableData);
-  }, 800);
-};
+}
+```

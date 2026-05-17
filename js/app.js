@@ -1,4 +1,3 @@
-```javascript
 let currentFileName = "default";
 
 let tableData = [];

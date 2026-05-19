@@ -32,7 +32,9 @@ import {
 from
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* Firebase設定 */
+/* =========================
+   Firebase設定
+========================= */
 const firebaseConfig = {
 
   apiKey:
@@ -49,7 +51,9 @@ const firebaseConfig = {
 
 };
 
-/* 初期化 */
+/* =========================
+   初期化
+========================= */
 const app =
   initializeApp(
     firebaseConfig
@@ -66,7 +70,9 @@ const auth =
 const provider =
   new GoogleAuthProvider();
 
-/* グローバル公開 */
+/* =========================
+   グローバル公開
+========================= */
 window.firebaseDB =
   db;
 
@@ -101,3 +107,18 @@ window.firebaseFunctions = {
 console.log(
   "Firebase ready"
 );
+
+/* =========================
+   読込完了通知
+========================= */
+window.firebaseReady =
+  true;
+
+document.dispatchEvent(
+
+  new Event(
+    "firebase-ready"
+  )
+
+);
+

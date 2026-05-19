@@ -7,10 +7,15 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    content="
+      width=device-width,
+      initial-scale=1.0
+    "
   >
 
-  <title>管理アプリ</title>
+  <title>
+    管理アプリ
+  </title>
 
   <link
     rel="stylesheet"
@@ -21,26 +26,35 @@
 
 <body>
 
-  <h1>管理アプリ</h1>
+  <h1>
+    管理アプリ
+  </h1>
 
   <!-- ログイン -->
-  <button id="loginButton">
-    Googleログイン
-  </button>
+  <div class="auth-area">
 
-  <div id="userInfo"></div>
+    <button id="loginButton">
+      Googleログイン
+    </button>
 
-  <!-- ファイル・フォルダ -->
-  <div class="file-controls">
+    <span id="userInfo"></span>
 
-    <!-- フォルダ -->
+  </div>
+
+  <!-- フォルダ -->
+  <div class="folder-controls">
+
     <select id="folderSelect"></select>
 
     <button id="newFolderButton">
       ＋ フォルダ追加
     </button>
 
-    <!-- ファイル -->
+  </div>
+
+  <!-- ファイル -->
+  <div class="file-controls">
+
     <select id="fileSelect"></select>
 
     <button id="newFileButton">
@@ -53,11 +67,11 @@
 
   </div>
 
-  <!-- 操作 -->
+  <!-- テーブル操作 -->
   <div class="controls">
 
     <button id="addRowButton">
-      ＋ 項目追加
+      ＋ 行追加
     </button>
 
     <button id="deleteRowButton">
@@ -87,14 +101,25 @@
     src="js/firebase.js"
   ></script>
 
-  <!-- JS -->
-  <script src="js/storage.js"></script>
+  <!-- Storage -->
+  <script
+    src="js/storage.js"
+  ></script>
 
-  <script src="js/suggestion.js"></script>
+  <!-- Suggest -->
+  <script
+    src="js/suggestion.js"
+  ></script>
 
-  <script src="js/table.js"></script>
+  <!-- Table -->
+  <script
+    src="js/table.js"
+  ></script>
 
-  <script src="js/app.js"></script>
+  <!-- App -->
+  <script
+    src="js/app.js"
+  ></script>
 
 </body>
 

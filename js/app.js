@@ -53,37 +53,47 @@ document
   };
 
 /* =========================
-   認証監視
+   Firebase読込後
 ========================= */
-window.firebaseAuthLib
-  .onAuthStateChanged(
+document.addEventListener(
 
-    window.firebaseAuth,
+  "firebase-ready",
 
-    async (user) => {
+  () => {
 
-      if (!user)
-        return;
+    window.firebaseAuthLib
+      .onAuthStateChanged(
 
-      console.log(
-        "ログイン:",
-        user.uid
+        window.firebaseAuth,
+
+        async (user) => {
+
+          if (!user)
+            return;
+
+          console.log(
+            "ログイン:",
+            user.uid
+          );
+
+          document
+            .getElementById(
+              "userInfo"
+            )
+            .textContent =
+              user.email;
+
+          await refreshFolders();
+
+          await refreshFiles();
+
+        }
+
       );
 
-      document
-        .getElementById(
-          "userInfo"
-        )
-        .textContent =
-          user.email;
+  }
 
-      await refreshFolders();
-
-      await refreshFiles();
-
-    }
-
-  );
+);
 
 /* =========================
    フォルダ一覧
@@ -98,9 +108,9 @@ async function refreshFolders() {
   select.innerHTML = "";
 
   const folders =
-    await window.getFolderNames();
+    await window
+      .getFolderNames();
 
-  /* default無ければ追加 */
   if (
     !folders.includes(
       "default"
@@ -122,7 +132,8 @@ async function refreshFolders() {
 
     opt.value = folder;
 
-    opt.textContent = folder;
+    opt.textContent =
+      folder;
 
     select.appendChild(opt);
 
@@ -151,6 +162,26 @@ async function refreshFiles() {
         currentFolder
       );
 
+  if (
+    files.length === 0
+  ) {
+
+    tableData = [
+
+      ["項目", "列1"],
+
+      ["", ""]
+
+    ];
+
+    renderTable(
+      tableData
+    );
+
+    return;
+
+  }
+
   files.forEach(name => {
 
     const opt =
@@ -160,11 +191,27 @@ async function refreshFiles() {
 
     opt.value = name;
 
-    opt.textContent = name;
+    opt.textContent =
+      name;
 
     select.appendChild(opt);
 
   });
+
+  currentFileName =
+    files[0];
+
+  select.value =
+    currentFileName;
+
+  tableData =
+    await window.loadFile(
+      currentFileName
+    );
+
+  renderTable(
+    tableData
+  );
 
 }
 
@@ -256,187 +303,3 @@ document
 
   };
 
-/* =========================
-   保存
-========================= */
-document
-  .getElementById(
-    "saveButton"
-  )
-  .onclick = async () => {
-
-    await window.saveFile(
-
-      currentFileName,
-
-      tableData,
-
-      currentFolder
-
-    );
-
-    console.log(
-      "保存完了"
-    );
-
-  };
-
-/* =========================
-   ファイル削除
-========================= */
-document
-  .getElementById(
-    "deleteFileButton"
-  )
-  .onclick = async () => {
-
-    await window.deleteFile(
-      currentFileName
-    );
-
-    await refreshFiles();
-
-  };
-
-/* =========================
-   ファイル切替
-========================= */
-document
-  .getElementById(
-    "fileSelect"
-  )
-  .onchange = async (e) => {
-
-    currentFileName =
-      e.target.value;
-
-    tableData =
-      await window.loadFile(
-        currentFileName
-      );
-
-    if (!tableData) {
-
-      tableData = [
-
-        ["項目", "列1"],
-
-        ["", ""]
-
-      ];
-
-    }
-
-    renderTable(
-      tableData
-    );
-
-  };
-
-/* =========================
-   行追加
-========================= */
-document
-  .getElementById(
-    "addRowButton"
-  )
-  .onclick = () => {
-
-    addNewRow(
-      tableData
-    );
-
-    renderTable(
-      tableData
-    );
-
-  };
-
-/* =========================
-   行削除
-========================= */
-document
-  .getElementById(
-    "deleteRowButton"
-  )
-  .onclick = () => {
-
-    deleteLastRow(
-      tableData
-    );
-
-    renderTable(
-      tableData
-    );
-
-  };
-
-/* =========================
-   列追加
-========================= */
-document
-  .getElementById(
-    "addColumnButton"
-  )
-  .onclick = () => {
-
-    addNewColumn(
-      tableData
-    );
-
-    renderTable(
-      tableData
-    );
-
-  };
-
-/* =========================
-   列削除
-========================= */
-document
-  .getElementById(
-    "deleteColumnButton"
-  )
-  .onclick = () => {
-
-    deleteLastColumn(
-      tableData
-    );
-
-    renderTable(
-      tableData
-    );
-
-  };
-
-/* =========================
-   自動保存
-========================= */
-document.addEventListener(
-
-  "input",
-
-  async () => {
-
-    if (
-      !currentFileName
-    )
-      return;
-
-    await window.autoSaveFile(
-
-      currentFileName,
-
-      tableData,
-
-      currentFolder
-
-    );
-
-  }
-
-);
-
-console.log(
-  "app.js loaded"
-);

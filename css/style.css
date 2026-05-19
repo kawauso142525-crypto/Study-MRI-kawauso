@@ -1,102 +1,518 @@
 body {
 
-  font-family: sans-serif;
-  margin: 20px;
+  font-family:
+    sans-serif;
+
+  background:
+    #f5f5f5;
+
+  margin:
+    0;
+
+  padding:
+    16px;
+
+  color:
+    #222;
+
 }
 
+/* =========================
+   TITLE
+========================= */
 h1 {
 
-  margin-bottom: 20px;
+  margin-top:
+    0;
+
+  margin-bottom:
+    20px;
+
+  font-size:
+    28px;
+
+  font-weight:
+    bold;
+
 }
 
-.file-controls {
+/* =========================
+   APP LAYOUT
+========================= */
+.appLayout {
 
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+  display:
+    flex;
+
+  gap:
+    20px;
+
+  align-items:
+    flex-start;
+
 }
 
-#fileSelect {
+/* =========================
+   SIDEBAR
+========================= */
+.sidebar {
 
-  padding: 8px;
+  width:
+    320px;
+
+  flex-shrink:
+    0;
+
 }
 
-#newFileButton {
+/* =========================
+   MAIN CONTENT
+========================= */
+.mainContent {
 
-  padding: 8px 12px;
+  flex:
+    1;
+
+  min-width:
+    0;
+
 }
 
-.controls {
+/* =========================
+   PANEL
+========================= */
+.panel {
 
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
+  background:
+    white;
+
+  border-radius:
+    14px;
+
+  padding:
+    16px;
+
+  margin-bottom:
+    18px;
+
+  box-shadow:
+    0 2px 10px
+    rgba(
+      0,
+      0,
+      0,
+      0.08
+    );
+
 }
 
+/* =========================
+   PANEL TITLE
+========================= */
+.panel h2 {
+
+  margin-top:
+    0;
+
+  margin-bottom:
+    14px;
+
+  font-size:
+    18px;
+
+}
+
+/* =========================
+   BUTTON ROW
+========================= */
+.buttonRow {
+
+  display:
+    flex;
+
+  flex-wrap:
+    wrap;
+
+  gap:
+    10px;
+
+  margin-bottom:
+    14px;
+
+}
+
+/* =========================
+   BUTTON
+========================= */
 button {
 
-  padding: 8px 12px;
-  cursor: pointer;
+  border:
+    none;
+
+  border-radius:
+    8px;
+
+  padding:
+    10px 14px;
+
+  cursor:
+    pointer;
+
+  background:
+    #1976d2;
+
+  color:
+    white;
+
+  font-size:
+    14px;
+
+  font-weight:
+    500;
+
+  transition:
+    0.2s;
+
+  touch-action:
+    manipulation;
+
 }
 
-table {
+button:hover {
 
-  border-collapse: collapse;
-  width: 100%;
-  min-width: 600px;
+  opacity:
+    0.9;
+
+  transform:
+    translateY(-1px);
+
 }
 
-th,
-td {
+/* =========================
+   DELETE BUTTONS
+========================= */
+#deleteFileButton,
+#deleteFolderButton,
+#deleteRowButton,
+#deleteColumnButton {
 
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: center;
+  background:
+    #d32f2f;
+
 }
 
+/* =========================
+   BACK BUTTON
+========================= */
+#backFolderButton {
+
+  background:
+    #616161;
+
+}
+
+/* =========================
+   INPUT / SELECT
+========================= */
 input,
 select {
 
-  width: 100%;
-  box-sizing: border-box;
-  padding: 5px;
+  width:
+    100%;
+
+  box-sizing:
+    border-box;
+
+  padding:
+    10px;
+
+  border:
+    1px solid #ccc;
+
+  border-radius:
+    8px;
+
+  font-size:
+    14px;
+
+  background:
+    white;
+
 }
 
+/* =========================
+   SELECT
+========================= */
+select {
+
+  cursor:
+    pointer;
+
+}
+
+/* =========================
+   USER INFO
+========================= */
+#userInfo {
+
+  font-size:
+    14px;
+
+  color:
+    #444;
+
+  word-break:
+    break-all;
+
+}
+
+/* =========================
+   PATH
+========================= */
+#currentPath {
+
+  margin-top:
+    10px;
+
+  font-size:
+    13px;
+
+  color:
+    #666;
+
+  word-break:
+    break-all;
+
+  background:
+    #fafafa;
+
+  padding:
+    8px;
+
+  border-radius:
+    8px;
+
+}
+
+/* =========================
+   TABLE WRAPPER
+========================= */
 .table-wrapper {
 
-  overflow-x: auto;
+  overflow-x:
+    auto;
+
+  width:
+    100%;
+
+  border-radius:
+    10px;
+
 }
 
-.delete-row-button,
-.delete-column-button {
+/* =========================
+   TABLE
+========================= */
+table {
 
-  background-color: #ffdddd;
-  border: 1px solid #ff8888;
+  border-collapse:
+    collapse;
+
+  width:
+    100%;
+
+  min-width:
+    700px;
+
+  background:
+    white;
+
 }
 
-@media (max-width: 768px) {
+/* =========================
+   CELL
+========================= */
+th,
+td {
+
+  border:
+    1px solid #ddd;
+
+  padding:
+    8px;
+
+  text-align:
+    center;
+
+  min-width:
+    120px;
+
+}
+
+/* =========================
+   HEADER
+========================= */
+th {
+
+  background:
+    #f0f4ff;
+
+  font-weight:
+    bold;
+
+}
+
+/* =========================
+   TABLE INPUT
+========================= */
+td input {
+
+  border:
+    none;
+
+  outline:
+    none;
+
+  width:
+    100%;
+
+  background:
+    transparent;
+
+  padding:
+    6px;
+
+  font-size:
+    14px;
+
+}
+
+/* =========================
+   FOCUS
+========================= */
+td input:focus {
+
+  background:
+    #fffde7;
+
+}
+
+/* =========================
+   FOLDER TREE（追加UI対応）
+========================= */
+#folderTree {
+
+  margin-top:
+    10px;
+
+  padding:
+    10px;
+
+  background:
+    #fafafa;
+
+  border:
+    1px solid #eee;
+
+  border-radius:
+    8px;
+
+  font-size:
+    13px;
+
+  color:
+    #555;
+
+  max-height:
+    200px;
+
+  overflow-y:
+    auto;
+
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media (
+  max-width: 768px
+) {
 
   body {
 
-    margin: 10px;
+    padding:
+      10px;
+
+  }
+
+  h1 {
+
+    font-size:
+      24px;
+
+  }
+
+  .appLayout {
+
+    flex-direction:
+      column;
+
+  }
+
+  .sidebar {
+
+    width:
+      100%;
+
+  }
+
+  .mainContent {
+
+    width:
+      100%;
+
+  }
+
+  .panel {
+
+    padding:
+      12px;
+
   }
 
   button {
 
-    font-size: 14px;
-    padding: 10px;
+    flex:
+      1 1 auto;
+
+    min-width:
+      120px;
+
+    font-size:
+      14px;
+
+    padding:
+      12px;
+
   }
 
   th,
   td {
 
-    min-width: 120px;
+    min-width:
+      140px;
+
   }
 
   input,
   select {
 
-    font-size: 16px;
+    font-size:
+      16px;
+
+    padding:
+      12px;
+
   }
+
 }

@@ -37,32 +37,219 @@ function saveAllFiles(
 }
 
 /* =========================
-   読込
+   ファイル読込
 ========================= */
-async function loadFile(
-  fileName
-) {
+window.loadFile =
+  async function(
+    fileName
+  ) {
 
-  const user =
-    window.firebaseAuth
-      ?.currentUser;
+    const user =
+      window.firebaseAuth
+        ?.currentUser;
 
-  if (!user)
+    if (!user)
+      return null;
+
+    const uid =
+      user.uid;
+
+    const {
+      doc,
+      getDoc
+    } =
+      window.firebaseFunctions;
+
+    try {
+
+      const snap =
+        await getDoc(
+
+          doc(
+
+            window.firebaseDB,
+
+            "users",
+
+            uid,
+
+            "files",
+
+            fileName
+
+          )
+
+        );
+
+      if (
+        snap.exists()
+      ) {
+
+        const raw =
+          snap.data()
+            .tableData;
+
+        return JSON.parse(
+          raw
+        );
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "loadFile error:",
+        error
+      );
+
+    }
+
     return null;
 
-  const uid =
-    user.uid;
+  };
 
-  const {
-    doc,
-    getDoc
-  } =
-    window.firebaseFunctions;
+/* =========================
+   ファイル保存
+========================= */
+window.saveFile =
+  async function(
 
-  try {
+    fileName,
 
-    const snap =
-      await getDoc(
+    data,
+
+    folder =
+      "default"
+
+  ) {
+
+    const allFiles =
+      loadAllFiles();
+
+    allFiles[fileName] = {
+
+      folder,
+
+      tableData:
+        data
+
+    };
+
+    saveAllFiles(
+      allFiles
+    );
+
+    const user =
+      window.firebaseAuth
+        ?.currentUser;
+
+    if (!user)
+      return;
+
+    const uid =
+      user.uid;
+
+    const {
+      doc,
+      setDoc
+    } =
+      window.firebaseFunctions;
+
+    try {
+
+      await setDoc(
+
+        doc(
+
+          window.firebaseDB,
+
+          "users",
+
+          uid,
+
+          "files",
+
+          fileName
+
+        ),
+
+        {
+
+          folder,
+
+          tableData:
+            JSON.stringify(
+              data
+            )
+
+        }
+
+      );
+
+    } catch (error) {
+
+      console.error(
+        "saveFile error:",
+        error
+      );
+
+    }
+
+  };
+
+/* =========================
+   自動保存
+========================= */
+window.autoSaveFile =
+  async function(
+
+    fileName,
+
+    data,
+
+    folder
+
+  ) {
+
+    await window.saveFile(
+
+      fileName,
+
+      data,
+
+      folder
+
+    );
+
+  };
+
+/* =========================
+   ファイル削除
+========================= */
+window.deleteFile =
+  async function(
+    fileName
+  ) {
+
+    const user =
+      window.firebaseAuth
+        ?.currentUser;
+
+    if (!user)
+      return;
+
+    const uid =
+      user.uid;
+
+    const {
+      doc,
+      deleteDoc
+    } =
+      window.firebaseFunctions;
+
+    try {
+
+      await deleteDoc(
 
         doc(
 
@@ -80,385 +267,285 @@ async function loadFile(
 
       );
 
-    if (
-      snap.exists()
-    ) {
+    } catch (error) {
 
-      const raw =
-        snap.data()
-          .tableData;
-
-      return JSON.parse(
-        raw
+      console.error(
+        "deleteFile error:",
+        error
       );
 
     }
 
-  } catch (error) {
-
-    console.error(
-      "loadFile error:",
-      error
-    );
-
-  }
-
-  return null;
-
-}
-
-/* =========================
-   保存
-========================= */
-async function saveFile(
-
-  fileName,
-
-  data,
-
-  folder = "default"
-
-) {
-
-  /* local保存 */
-  const allFiles =
-    loadAllFiles();
-
-  allFiles[fileName] = {
-
-    folder,
-
-    tableData: data
-
   };
-
-  saveAllFiles(
-    allFiles
-  );
-
-  /* Firebase */
-  const user =
-    window.firebaseAuth
-      ?.currentUser;
-
-  if (!user)
-    return;
-
-  const uid =
-    user.uid;
-
-  const {
-    doc,
-    setDoc
-  } =
-    window.firebaseFunctions;
-
-  try {
-
-    await setDoc(
-
-      doc(
-
-        window.firebaseDB,
-
-        "users",
-
-        uid,
-
-        "files",
-
-        fileName
-
-      ),
-
-      {
-
-        folder,
-
-        tableData:
-          JSON.stringify(
-            data
-          )
-
-      }
-
-    );
-
-    console.log(
-      "save success:",
-      fileName
-    );
-
-  } catch (error) {
-
-    console.error(
-      "saveFile error:",
-      error
-    );
-
-  }
-
-}
-
-/* =========================
-   自動保存
-========================= */
-async function autoSaveFile(
-
-  fileName,
-
-  data,
-
-  folder
-
-) {
-
-  await saveFile(
-
-    fileName,
-
-    data,
-
-    folder
-
-  );
-
-}
-
-/* =========================
-   削除
-========================= */
-async function deleteFile(
-  fileName
-) {
-
-  const user =
-    window.firebaseAuth
-      ?.currentUser;
-
-  if (!user)
-    return;
-
-  const uid =
-    user.uid;
-
-  const {
-    doc,
-    deleteDoc
-  } =
-    window.firebaseFunctions;
-
-  try {
-
-    await deleteDoc(
-
-      doc(
-
-        window.firebaseDB,
-
-        "users",
-
-        uid,
-
-        "files",
-
-        fileName
-
-      )
-
-    );
-
-  } catch (error) {
-
-    console.error(
-      "deleteFile error:",
-      error
-    );
-
-  }
-
-}
 
 /* =========================
    フォルダ一覧
 ========================= */
-async function getFolderNames() {
+window.getFolderNames =
+  async function() {
 
-  const user =
-    window.firebaseAuth
-      ?.currentUser;
+    const user =
+      window.firebaseAuth
+        ?.currentUser;
 
-  if (!user)
-    return [];
+    if (!user)
+      return [];
 
-  const uid =
-    user.uid;
+    const uid =
+      user.uid;
 
-  const {
-    collection,
-    getDocs
-  } =
-    window.firebaseFunctions;
+    const {
+      collection,
+      getDocs
+    } =
+      window.firebaseFunctions;
 
-  try {
+    try {
 
-    const querySnapshot =
-      await getDocs(
+      const querySnapshot =
+        await getDocs(
 
-        collection(
+          collection(
 
-          window.firebaseDB,
+            window.firebaseDB,
 
-          "users",
+            "users",
 
-          uid,
+            uid,
 
-          "files"
+            "files"
 
-        )
+          )
 
-      );
-
-    const folders =
-      new Set();
-
-    querySnapshot.forEach(doc => {
-
-      const data =
-        doc.data();
-
-      if (
-        data.folder
-      ) {
-
-        folders.add(
-          data.folder
         );
 
-      }
+      const folders =
+        new Set();
 
-    });
+      querySnapshot.forEach(
+        docSnap => {
 
-    return [
-      ...folders
-    ];
+          const data =
+            docSnap.data();
 
-  } catch (error) {
+          folders.add(
 
-    console.error(
-      "getFolderNames error:",
-      error
-    );
+            data.folder
+            || "default"
 
-    return [];
+          );
 
-  }
+        }
+      );
 
-}
+      return [
+        ...folders
+      ];
+
+    } catch (error) {
+
+      console.error(
+        "getFolderNames error:",
+        error
+      );
+
+      return [];
+
+    }
+
+  };
 
 /* =========================
    フォルダ別ファイル
 ========================= */
-async function getFileNamesByFolder(
-  folder
-) {
+window.getFileNamesByFolder =
+  async function(
+    folder
+  ) {
 
-  const user =
-    window.firebaseAuth
-      ?.currentUser;
+    const user =
+      window.firebaseAuth
+        ?.currentUser;
 
-  if (!user)
-    return [];
+    if (!user)
+      return [];
 
-  const uid =
-    user.uid;
+    const uid =
+      user.uid;
 
-  const {
-    collection,
-    getDocs
-  } =
-    window.firebaseFunctions;
+    const {
+      collection,
+      getDocs
+    } =
+      window.firebaseFunctions;
 
-  try {
+    try {
 
-    const querySnapshot =
-      await getDocs(
+      const querySnapshot =
+        await getDocs(
 
-        collection(
+          collection(
 
-          window.firebaseDB,
+            window.firebaseDB,
 
-          "users",
+            "users",
 
-          uid,
+            uid,
 
-          "files"
+            "files"
 
-        )
+          )
 
+        );
+
+      const files = [];
+
+      querySnapshot.forEach(
+        docSnap => {
+
+          const data =
+            docSnap.data();
+
+          if (
+
+            (
+              data.folder
+              || "default"
+            )
+
+            ===
+
+            folder
+
+          ) {
+
+            files.push(
+              docSnap.id
+            );
+
+          }
+
+        }
       );
 
-    const files = [];
+      return files;
 
-    querySnapshot.forEach(doc => {
+    } catch (error) {
 
-      const data =
-        doc.data();
+      console.error(
+        "getFileNamesByFolder error:",
+        error
+      );
 
-      if (
+      return [];
 
-        (
-          data.folder
-          || "default"
-        )
+    }
 
-        === folder
+  };
 
+/* =========================
+   フォルダ削除
+========================= */
+window.deleteFolder =
+  async function(
+    folderPath
+  ) {
+
+    const user =
+      window.firebaseAuth
+        ?.currentUser;
+
+    if (!user)
+      return;
+
+    const uid =
+      user.uid;
+
+    const {
+      collection,
+      getDocs,
+      doc,
+      deleteDoc
+    } =
+      window.firebaseFunctions;
+
+    try {
+
+      const querySnapshot =
+        await getDocs(
+
+          collection(
+
+            window.firebaseDB,
+
+            "users",
+
+            uid,
+
+            "files"
+
+          )
+
+        );
+
+      for (
+        const fileDoc
+        of querySnapshot.docs
       ) {
 
-        files.push(
-          doc.id
-        );
+        const data =
+          fileDoc.data();
+
+        const folder =
+          data.folder
+          || "default";
+
+        /* 対象 */
+        if (
+
+          folder ===
+          folderPath
+
+          ||
+
+          folder.startsWith(
+            folderPath + "/"
+          )
+
+        ) {
+
+          await deleteDoc(
+
+            doc(
+
+              window.firebaseDB,
+
+              "users",
+
+              uid,
+
+              "files",
+
+              fileDoc.id
+
+            )
+
+          );
+
+        }
 
       }
 
-    });
+    } catch (error) {
 
-    return files;
+      console.error(
+        "deleteFolder error:",
+        error
+      );
 
-  } catch (error) {
+    }
 
-    console.error(
-      "getFileNamesByFolder error:",
-      error
-    );
-
-    return [];
-
-  }
-
-}
-
-/* =========================
-   グローバル公開
-========================= */
-window.loadFile =
-  loadFile;
-
-window.saveFile =
-  saveFile;
-
-window.autoSaveFile =
-  autoSaveFile;
-
-window.deleteFile =
-  deleteFile;
-
-window.getFolderNames =
-  getFolderNames;
-
-window.getFileNamesByFolder =
-  getFileNamesByFolder;
+  };
 
 console.log(
   "storage.js loaded"

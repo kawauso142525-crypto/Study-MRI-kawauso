@@ -7,6 +7,18 @@ let currentFileName =
 let tableData = [];
 
 /* =========================
+   共通：安全フォルダ正規化
+========================= */
+function normalizeFolder(folder) {
+
+  if (!folder)
+    return "default";
+
+  return folder;
+
+}
+
+/* =========================
    ログイン
 ========================= */
 async function login() {
@@ -54,7 +66,7 @@ document
   };
 
 /* =========================
-   Firebase読込後
+   Firebase Ready
 ========================= */
 document.addEventListener(
 
@@ -97,6 +109,25 @@ document.addEventListener(
 );
 
 /* =========================
+   現在パス表示
+========================= */
+function updateCurrentPath() {
+
+  const area =
+    document.getElementById(
+      "currentPath"
+    );
+
+  if (!area)
+    return;
+
+  area.textContent =
+    "現在: " +
+    currentFolder;
+
+}
+
+/* =========================
    フォルダ一覧
 ========================= */
 async function refreshFolders() {
@@ -108,43 +139,30 @@ async function refreshFolders() {
 
   select.innerHTML = "";
 
-  const folders =
+  let folders =
     await window
       .getFolderNames();
 
   if (
-    !folders.includes(
-      "default"
-    )
+    !folders.includes("default")
   ) {
 
-    folders.unshift(
-      "default"
-    );
+    folders.unshift("default");
 
   }
 
-  /* =========================
-     現在階層のみ表示
-  ========================= */
   const visibleFolders =
     folders.filter(folder => {
 
-      /* default */
-      if (
-        currentFolder ===
-        "default"
-      ) {
+      if (currentFolder === "default") {
 
         return (
-          folder !== "default"
-          &&
+          folder !== "default" &&
           !folder.includes("/")
         );
 
       }
 
-      /* 子階層 */
       return (
 
         folder.startsWith(
@@ -165,52 +183,36 @@ async function refreshFolders() {
 
     });
 
-  /* default追加 */
-  if (
-    currentFolder ===
-    "default"
-  ) {
+  if (currentFolder === "default") {
 
     const opt =
-      document.createElement(
-        "option"
-      );
+      document.createElement("option");
 
-    opt.value =
-      "default";
+    opt.value = "default";
+    opt.textContent = "default";
 
-    opt.textContent =
-      "default";
-
-    select.appendChild(
-      opt
-    );
+    select.appendChild(opt);
 
   }
 
   visibleFolders.forEach(folder => {
 
     const opt =
-      document.createElement(
-        "option"
-      );
+      document.createElement("option");
 
     opt.value = folder;
 
-    /* 表示名だけ */
     opt.textContent =
-      folder
-        .split("/")
-        .pop();
+      folder.split("/").pop();
 
-    select.appendChild(
-      opt
-    );
+    select.appendChild(opt);
 
   });
 
   select.value =
     currentFolder;
+
+  updateCurrentPath();
 
 }
 
@@ -227,37 +229,25 @@ async function refreshFiles() {
   select.innerHTML = "";
 
   let files =
-    await window
-      .getFileNamesByFolder(
-        currentFolder
-      );
+    await window.getFileNamesByFolder(
+      currentFolder
+    );
 
-  /* ダミーファイル除外 */
   files =
     files.filter(
-      name =>
-        name !== "_folder_init"
+      name => name !== "_folder_init"
     );
 
-  /* ファイルなし */
-  if (
-    files.length === 0
-  ) {
+  if (files.length === 0) {
 
     tableData = [
-
       ["項目", "列1"],
-
       ["", ""]
-
     ];
 
-    renderTable(
-      tableData
-    );
+    renderTable(tableData);
 
-    currentFileName =
-      "";
+    currentFileName = "";
 
     return;
 
@@ -266,18 +256,12 @@ async function refreshFiles() {
   files.forEach(name => {
 
     const opt =
-      document.createElement(
-        "option"
-      );
+      document.createElement("option");
 
     opt.value = name;
+    opt.textContent = name;
 
-    opt.textContent =
-      name;
-
-    select.appendChild(
-      opt
-    );
+    select.appendChild(opt);
 
   });
 
@@ -295,18 +279,13 @@ async function refreshFiles() {
   if (!tableData) {
 
     tableData = [
-
       ["項目", "列1"],
-
       ["", ""]
-
     ];
 
   }
 
-  renderTable(
-    tableData
-  );
+  renderTable(tableData);
 
 }
 
@@ -314,40 +293,24 @@ async function refreshFiles() {
    フォルダ追加
 ========================= */
 document
-  .getElementById(
-    "newFolderButton"
-  )
+  .getElementById("newFolderButton")
   .onclick = async () => {
 
     const name =
-      prompt(
-        "フォルダ名"
-      );
+      prompt("フォルダ名");
 
     if (!name)
       return;
 
-    currentFolder =
-      name;
+    currentFolder = name;
 
     await window.saveFile(
-
       "_folder_init",
-
-      [
-
-        ["項目", "列1"],
-
-        ["", ""]
-
-      ],
-
+      [["項目", "列1"], ["", ""]],
       currentFolder
-
     );
 
     await refreshFolders();
-
     await refreshFiles();
 
   };
@@ -356,42 +319,89 @@ document
    子フォルダ追加
 ========================= */
 document
-  .getElementById(
-    "newSubFolderButton"
-  )
+  .getElementById("newSubFolderButton")
   .onclick = async () => {
 
     const name =
-      prompt(
-        "子フォルダ名"
-      );
+      prompt("子フォルダ名");
 
     if (!name)
       return;
 
     currentFolder =
-      currentFolder
-      + "/"
-      + name;
+      currentFolder + "/" + name;
 
     await window.saveFile(
-
       "_folder_init",
-
-      [
-
-        ["項目", "列1"],
-
-        ["", ""]
-
-      ],
-
+      [["項目", "列1"], ["", ""]],
       currentFolder
-
     );
 
     await refreshFolders();
+    await refreshFiles();
 
+  };
+
+/* =========================
+   戻る
+========================= */
+document
+  .getElementById("backFolderButton")
+  .onclick = async () => {
+
+    if (currentFolder === "default")
+      return;
+
+    const split =
+      currentFolder.split("/");
+
+    split.pop();
+
+    currentFolder =
+      split.length === 0
+        ? "default"
+        : split.join("/");
+
+    await refreshFolders();
+    await refreshFiles();
+
+  };
+
+/* =========================
+   フォルダ削除
+========================= */
+document
+  .getElementById("deleteFolderButton")
+  .onclick = async () => {
+
+    if (currentFolder === "default") {
+
+      alert("defaultは削除不可");
+      return;
+
+    }
+
+    const ok =
+      confirm(
+        currentFolder + " を削除しますか？"
+      );
+
+    if (!ok)
+      return;
+
+    await window.deleteFolder(currentFolder);
+
+    const split =
+      currentFolder.split("/");
+
+    split.pop();
+
+    currentFolder =
+      split.length === 0
+        ? "default"
+        : split.join("/");
+
+    await refreshFolders();
     await refreshFiles();
 
   };
@@ -400,16 +410,13 @@ document
    フォルダ変更
 ========================= */
 document
-  .getElementById(
-    "folderSelect"
-  )
+  .getElementById("folderSelect")
   .onchange = async (e) => {
 
     currentFolder =
-      e.target.value;
+      normalizeFolder(e.target.value);
 
     await refreshFolders();
-
     await refreshFiles();
 
   };
@@ -418,38 +425,26 @@ document
    新規ファイル
 ========================= */
 document
-  .getElementById(
-    "newFileButton"
-  )
+  .getElementById("newFileButton")
   .onclick = async () => {
 
     const name =
-      prompt(
-        "ファイル名"
-      );
+      prompt("ファイル名");
 
     if (!name)
       return;
 
-    currentFileName =
-      name;
+    currentFileName = name;
 
     tableData = [
-
       ["項目", "列1"],
-
       ["", ""]
-
     ];
 
     await window.saveFile(
-
       name,
-
       tableData,
-
       currentFolder
-
     );
 
     await refreshFiles();
@@ -460,29 +455,19 @@ document
    保存
 ========================= */
 document
-  .getElementById(
-    "saveButton"
-  )
+  .getElementById("saveButton")
   .onclick = async () => {
 
-    if (
-      !currentFileName
-    )
+    if (!currentFileName)
       return;
 
     await window.saveFile(
-
       currentFileName,
-
       tableData,
-
       currentFolder
-
     );
 
-    console.log(
-      "保存完了"
-    );
+    console.log("保存完了");
 
   };
 
@@ -490,19 +475,13 @@ document
    ファイル削除
 ========================= */
 document
-  .getElementById(
-    "deleteFileButton"
-  )
+  .getElementById("deleteFileButton")
   .onclick = async () => {
 
-    if (
-      !currentFileName
-    )
+    if (!currentFileName)
       return;
 
-    await window.deleteFile(
-      currentFileName
-    );
+    await window.deleteFile(currentFileName);
 
     await refreshFiles();
 
@@ -512,34 +491,24 @@ document
    ファイル切替
 ========================= */
 document
-  .getElementById(
-    "fileSelect"
-  )
+  .getElementById("fileSelect")
   .onchange = async (e) => {
 
-    currentFileName =
-      e.target.value;
+    currentFileName = e.target.value;
 
     tableData =
-      await window.loadFile(
-        currentFileName
-      );
+      await window.loadFile(currentFileName);
 
     if (!tableData) {
 
       tableData = [
-
         ["項目", "列1"],
-
         ["", ""]
-
       ];
 
     }
 
-    renderTable(
-      tableData
-    );
+    renderTable(tableData);
 
   };
 
@@ -547,18 +516,11 @@ document
    行追加
 ========================= */
 document
-  .getElementById(
-    "addRowButton"
-  )
+  .getElementById("addRowButton")
   .onclick = () => {
 
-    addNewRow(
-      tableData
-    );
-
-    renderTable(
-      tableData
-    );
+    addNewRow(tableData);
+    renderTable(tableData);
 
   };
 
@@ -566,18 +528,11 @@ document
    行削除
 ========================= */
 document
-  .getElementById(
-    "deleteRowButton"
-  )
+  .getElementById("deleteRowButton")
   .onclick = () => {
 
-    deleteLastRow(
-      tableData
-    );
-
-    renderTable(
-      tableData
-    );
+    deleteLastRow(tableData);
+    renderTable(tableData);
 
   };
 
@@ -585,18 +540,11 @@ document
    列追加
 ========================= */
 document
-  .getElementById(
-    "addColumnButton"
-  )
+  .getElementById("addColumnButton")
   .onclick = () => {
 
-    addNewColumn(
-      tableData
-    );
-
-    renderTable(
-      tableData
-    );
+    addNewColumn(tableData);
+    renderTable(tableData);
 
   };
 
@@ -604,18 +552,11 @@ document
    列削除
 ========================= */
 document
-  .getElementById(
-    "deleteColumnButton"
-  )
+  .getElementById("deleteColumnButton")
   .onclick = () => {
 
-    deleteLastColumn(
-      tableData
-    );
-
-    renderTable(
-      tableData
-    );
+    deleteLastColumn(tableData);
+    renderTable(tableData);
 
   };
 
@@ -623,30 +564,19 @@ document
    自動保存
 ========================= */
 document.addEventListener(
-
   "input",
-
   async () => {
 
-    if (
-      !currentFileName
-    )
+    if (!currentFileName)
       return;
 
     await window.autoSaveFile(
-
       currentFileName,
-
       tableData,
-
       currentFolder
-
     );
 
   }
-
 );
 
-console.log(
-  "app.js loaded"
-);
+console.log("app.js loaded");

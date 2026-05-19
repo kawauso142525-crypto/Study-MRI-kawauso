@@ -19,7 +19,8 @@ async function login() {
 
   const {
     signInWithPopup
-  } = window.firebaseAuthLib;
+  } =
+    window.firebaseAuthLib;
 
   try {
 
@@ -123,7 +124,71 @@ async function refreshFolders() {
 
   }
 
-  folders.forEach(folder => {
+  /* =========================
+     現在階層のみ表示
+  ========================= */
+  const visibleFolders =
+    folders.filter(folder => {
+
+      /* default */
+      if (
+        currentFolder ===
+        "default"
+      ) {
+
+        return (
+          folder !== "default"
+          &&
+          !folder.includes("/")
+        );
+
+      }
+
+      /* 子階層 */
+      return (
+
+        folder.startsWith(
+          currentFolder + "/"
+        )
+
+        &&
+
+        folder
+          .replace(
+            currentFolder + "/",
+            ""
+          )
+          .split("/")
+          .length === 1
+
+      );
+
+    });
+
+  /* default追加 */
+  if (
+    currentFolder ===
+    "default"
+  ) {
+
+    const opt =
+      document.createElement(
+        "option"
+      );
+
+    opt.value =
+      "default";
+
+    opt.textContent =
+      "default";
+
+    select.appendChild(
+      opt
+    );
+
+  }
+
+  visibleFolders.forEach(folder => {
 
     const opt =
       document.createElement(
@@ -132,10 +197,15 @@ async function refreshFolders() {
 
     opt.value = folder;
 
+    /* 表示名だけ */
     opt.textContent =
-      folder;
+      folder
+        .split("/")
+        .pop();
 
-    select.appendChild(opt);
+    select.appendChild(
+      opt
+    );
 
   });
 
@@ -169,6 +239,7 @@ async function refreshFiles() {
         name !== "_folder_init"
     );
 
+  /* ファイルなし */
   if (
     files.length === 0
   ) {
@@ -204,7 +275,9 @@ async function refreshFiles() {
     opt.textContent =
       name;
 
-    select.appendChild(opt);
+    select.appendChild(
+      opt
+    );
 
   });
 
@@ -322,3 +395,258 @@ document
     await refreshFiles();
 
   };
+
+/* =========================
+   フォルダ変更
+========================= */
+document
+  .getElementById(
+    "folderSelect"
+  )
+  .onchange = async (e) => {
+
+    currentFolder =
+      e.target.value;
+
+    await refreshFolders();
+
+    await refreshFiles();
+
+  };
+
+/* =========================
+   新規ファイル
+========================= */
+document
+  .getElementById(
+    "newFileButton"
+  )
+  .onclick = async () => {
+
+    const name =
+      prompt(
+        "ファイル名"
+      );
+
+    if (!name)
+      return;
+
+    currentFileName =
+      name;
+
+    tableData = [
+
+      ["項目", "列1"],
+
+      ["", ""]
+
+    ];
+
+    await window.saveFile(
+
+      name,
+
+      tableData,
+
+      currentFolder
+
+    );
+
+    await refreshFiles();
+
+  };
+
+/* =========================
+   保存
+========================= */
+document
+  .getElementById(
+    "saveButton"
+  )
+  .onclick = async () => {
+
+    if (
+      !currentFileName
+    )
+      return;
+
+    await window.saveFile(
+
+      currentFileName,
+
+      tableData,
+
+      currentFolder
+
+    );
+
+    console.log(
+      "保存完了"
+    );
+
+  };
+
+/* =========================
+   ファイル削除
+========================= */
+document
+  .getElementById(
+    "deleteFileButton"
+  )
+  .onclick = async () => {
+
+    if (
+      !currentFileName
+    )
+      return;
+
+    await window.deleteFile(
+      currentFileName
+    );
+
+    await refreshFiles();
+
+  };
+
+/* =========================
+   ファイル切替
+========================= */
+document
+  .getElementById(
+    "fileSelect"
+  )
+  .onchange = async (e) => {
+
+    currentFileName =
+      e.target.value;
+
+    tableData =
+      await window.loadFile(
+        currentFileName
+      );
+
+    if (!tableData) {
+
+      tableData = [
+
+        ["項目", "列1"],
+
+        ["", ""]
+
+      ];
+
+    }
+
+    renderTable(
+      tableData
+    );
+
+  };
+
+/* =========================
+   行追加
+========================= */
+document
+  .getElementById(
+    "addRowButton"
+  )
+  .onclick = () => {
+
+    addNewRow(
+      tableData
+    );
+
+    renderTable(
+      tableData
+    );
+
+  };
+
+/* =========================
+   行削除
+========================= */
+document
+  .getElementById(
+    "deleteRowButton"
+  )
+  .onclick = () => {
+
+    deleteLastRow(
+      tableData
+    );
+
+    renderTable(
+      tableData
+    );
+
+  };
+
+/* =========================
+   列追加
+========================= */
+document
+  .getElementById(
+    "addColumnButton"
+  )
+  .onclick = () => {
+
+    addNewColumn(
+      tableData
+    );
+
+    renderTable(
+      tableData
+    );
+
+  };
+
+/* =========================
+   列削除
+========================= */
+document
+  .getElementById(
+    "deleteColumnButton"
+  )
+  .onclick = () => {
+
+    deleteLastColumn(
+      tableData
+    );
+
+    renderTable(
+      tableData
+    );
+
+  };
+
+/* =========================
+   自動保存
+========================= */
+document.addEventListener(
+
+  "input",
+
+  async () => {
+
+    if (
+      !currentFileName
+    )
+      return;
+
+    await window.autoSaveFile(
+
+      currentFileName,
+
+      tableData,
+
+      currentFolder
+
+    );
+
+  }
+
+);
+
+console.log(
+  "app.js loaded"
+);

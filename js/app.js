@@ -65,6 +65,11 @@ window.firebaseAuthLib
       if (!user)
         return;
 
+      console.log(
+        "ログイン:",
+        user.uid
+      );
+
       document
         .getElementById(
           "userInfo"
@@ -93,7 +98,20 @@ async function refreshFolders() {
   select.innerHTML = "";
 
   const folders =
-    await getFolderNames();
+    await window.getFolderNames();
+
+  /* default無ければ追加 */
+  if (
+    !folders.includes(
+      "default"
+    )
+  ) {
+
+    folders.unshift(
+      "default"
+    );
+
+  }
 
   folders.forEach(folder => {
 
@@ -128,9 +146,10 @@ async function refreshFiles() {
   select.innerHTML = "";
 
   const files =
-    await getFileNamesByFolder(
-      currentFolder
-    );
+    await window
+      .getFileNamesByFolder(
+        currentFolder
+      );
 
   files.forEach(name => {
 
@@ -159,7 +178,9 @@ document
   .onclick = async () => {
 
     const name =
-      prompt("フォルダ名");
+      prompt(
+        "フォルダ名"
+      );
 
     if (!name)
       return;
@@ -199,7 +220,9 @@ document
   .onclick = async () => {
 
     const name =
-      prompt("ファイル名");
+      prompt(
+        "ファイル名"
+      );
 
     if (!name)
       return;
@@ -215,7 +238,7 @@ document
 
     ];
 
-    await saveFile(
+    await window.saveFile(
 
       name,
 
@@ -227,7 +250,9 @@ document
 
     await refreshFiles();
 
-    renderTable(tableData);
+    renderTable(
+      tableData
+    );
 
   };
 
@@ -240,7 +265,7 @@ document
   )
   .onclick = async () => {
 
-    await saveFile(
+    await window.saveFile(
 
       currentFileName,
 
@@ -250,10 +275,14 @@ document
 
     );
 
+    console.log(
+      "保存完了"
+    );
+
   };
 
 /* =========================
-   削除
+   ファイル削除
 ========================= */
 document
   .getElementById(
@@ -261,7 +290,7 @@ document
   )
   .onclick = async () => {
 
-    await deleteFile(
+    await window.deleteFile(
       currentFileName
     );
 
@@ -282,11 +311,25 @@ document
       e.target.value;
 
     tableData =
-      await loadFile(
+      await window.loadFile(
         currentFileName
       );
 
-    renderTable(tableData);
+    if (!tableData) {
+
+      tableData = [
+
+        ["項目", "列1"],
+
+        ["", ""]
+
+      ];
+
+    }
+
+    renderTable(
+      tableData
+    );
 
   };
 
@@ -299,9 +342,13 @@ document
   )
   .onclick = () => {
 
-    addNewRow(tableData);
+    addNewRow(
+      tableData
+    );
 
-    renderTable(tableData);
+    renderTable(
+      tableData
+    );
 
   };
 
@@ -314,9 +361,13 @@ document
   )
   .onclick = () => {
 
-    deleteLastRow(tableData);
+    deleteLastRow(
+      tableData
+    );
 
-    renderTable(tableData);
+    renderTable(
+      tableData
+    );
 
   };
 
@@ -329,9 +380,13 @@ document
   )
   .onclick = () => {
 
-    addNewColumn(tableData);
+    addNewColumn(
+      tableData
+    );
 
-    renderTable(tableData);
+    renderTable(
+      tableData
+    );
 
   };
 
@@ -344,9 +399,13 @@ document
   )
   .onclick = () => {
 
-    deleteLastColumn(tableData);
+    deleteLastColumn(
+      tableData
+    );
 
-    renderTable(tableData);
+    renderTable(
+      tableData
+    );
 
   };
 
@@ -359,7 +418,12 @@ document.addEventListener(
 
   async () => {
 
-    await autoSaveFile(
+    if (
+      !currentFileName
+    )
+      return;
+
+    await window.autoSaveFile(
 
       currentFileName,
 
@@ -371,4 +435,8 @@ document.addEventListener(
 
   }
 
+);
+
+console.log(
+  "app.js loaded"
 );

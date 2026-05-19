@@ -1,9 +1,8 @@
 function getSuggestions(rowIndex) {
 
-  const saved =
-    localStorage.getItem("suggestions");
+  const saved = localStorage.getItem("suggestions");
 
-  let suggestions = saved
+  const base = saved
     ? JSON.parse(saved)
     : {
         row1: [],
@@ -12,23 +11,20 @@ function getSuggestions(rowIndex) {
         shared: []
       };
 
-  if (rowIndex === 1) return suggestions.row1;
+  if (rowIndex === 1) return base.row1 || [];
+  if (rowIndex === 2) return base.row2 || [];
+  if (rowIndex === 3) return base.row3 || [];
 
-  if (rowIndex === 2) return suggestions.row2;
-
-  if (rowIndex === 3) return suggestions.row3;
-
-  return suggestions.shared;
+  return base.shared || [];
 }
 
 function saveSuggestion(rowIndex, value) {
 
-  if (!value.trim()) return;
+  if (!value || !value.trim()) return;
 
-  const saved =
-    localStorage.getItem("suggestions");
+  const saved = localStorage.getItem("suggestions");
 
-  let suggestions = saved
+  const suggestions = saved
     ? JSON.parse(saved)
     : {
         row1: [],
@@ -37,26 +33,17 @@ function saveSuggestion(rowIndex, value) {
         shared: []
       };
 
-  let targetArray;
+  let target;
 
-  if (rowIndex === 1) {
-    targetArray = suggestions.row1;
-  }
+  if (rowIndex === 1) target = suggestions.row1;
+  else if (rowIndex === 2) target = suggestions.row2;
+  else if (rowIndex === 3) target = suggestions.row3;
+  else target = suggestions.shared;
 
-  else if (rowIndex === 2) {
-    targetArray = suggestions.row2;
-  }
+  if (!Array.isArray(target)) return;
 
-  else if (rowIndex === 3) {
-    targetArray = suggestions.row3;
-  }
-
-  else {
-    targetArray = suggestions.shared;
-  }
-
-  if (!targetArray.includes(value)) {
-    targetArray.push(value);
+  if (!target.includes(value)) {
+    target.push(value);
   }
 
   localStorage.setItem(

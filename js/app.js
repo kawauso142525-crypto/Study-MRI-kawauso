@@ -1,582 +1,242 @@
-let currentFolder =
-  "default";
-
-let currentFileName =
-  "";
-
+let view = "folder";
+let currentFolder = "default";
+let currentFile = "";
 let tableData = [];
-
-/* =========================
-   共通：安全フォルダ正規化
-========================= */
-function normalizeFolder(folder) {
-
-  if (!folder)
-    return "default";
-
-  return folder;
-
-}
-
-/* =========================
-   ログイン
-========================= */
-async function login() {
-
-  const auth =
-    window.firebaseAuth;
-
-  const provider =
-    window.firebaseProvider;
-
-  const {
-    signInWithPopup
-  } =
-    window.firebaseAuthLib;
-
-  try {
-
-    await signInWithPopup(
-      auth,
-      provider
-    );
-
-  } catch (error) {
-
-    console.error(
-      "login error:",
-      error
-    );
-
-  }
-
-}
-
-/* =========================
-   ログインボタン
-========================= */
-document
-  .getElementById(
-    "loginButton"
-  )
-  .onclick = async () => {
-
-    await login();
-
-  };
 
 /* =========================
    Firebase Ready
 ========================= */
-document.addEventListener(
+document.addEventListener("firebase-ready", () => {
 
-  "firebase-ready",
+  window.firebaseAuthLib.onAuthStateChanged(
+    window.firebaseAuth,
+    async (user) => {
 
-  () => {
+      if (!user) return;
 
-    window.firebaseAuthLib
-      .onAuthStateChanged(
+      document.getElementById("title").textContent = user.email;
 
-        window.firebaseAuth,
+      await init();
 
-        async (user) => {
+    }
+  );
 
-          if (!user)
-            return;
-
-          console.log(
-            "ログイン:",
-            user.uid
-          );
-
-          document
-            .getElementById(
-              "userInfo"
-            )
-            .textContent =
-              user.email;
-
-          await refreshFolders();
-
-          await refreshFiles();
-
-        }
-
-      );
-
-  }
-
-);
+});
 
 /* =========================
-   現在パス表示
+   VIEW制御（iOSコア）
 ========================= */
-function updateCurrentPath() {
+function setView(v) {
 
-  const area =
-    document.getElementById(
-      "currentPath"
-    );
+  view = v;
 
-  if (!area)
+  document.getElementById("folderView").style.display = v === "folder" ? "block" : "none";
+  document.getElementById("fileView").style.display = v === "file" ? "block" : "none";
+  document.getElementById("tableView").style.display = v === "table" ? "block" : "none";
+
+  renderNav();
+}
+
+/* =========================
+   ナビ更新
+========================= */
+function renderNav() {
+
+  const title = document.getElementById("title");
+  const back = document.getElementById("backBtn");
+  const action = document.getElementById("actionBtn");
+
+  if (view === "folder") {
+    title.textContent = currentFolder;
+    back.style.visibility = "hidden";
+    action.textContent = "＋";
+  }
+
+  if (view === "file") {
+    title.textContent = currentFolder;
+    back.style.visibility = "visible";
+    action.textContent = "＋";
+  }
+
+  if (view === "table") {
+    title.textContent = currentFile;
+    back.style.visibility = "visible";
+    action.textContent = "💾";
+  }
+}
+
+/* =========================
+   戻る
+========================= */
+document.getElementById("backBtn").onclick = () => {
+
+  if (view === "table") {
+    setView("file");
     return;
+  }
 
-  area.textContent =
-    "現在: " +
-    currentFolder;
+  if (view === "file") {
+    setView("folder");
+    return;
+  }
 
+  const parts = currentFolder.split("/");
+  parts.pop();
+  currentFolder = parts.length ? parts.join("/") : "default";
+
+  init();
+};
+
+/* =========================
+   アクションボタン
+========================= */
+document.getElementById("actionBtn").onclick = async () => {
+
+  if (view === "folder") {
+
+    const name = prompt("フォルダ名");
+    if (!name) return;
+
+    currentFolder = name;
+
+    await window.saveFile("__init__", [["init"]], currentFolder);
+
+    await init();
+  }
+
+  if (view === "file") {
+
+    const name = prompt("ファイル名");
+    if (!name) return;
+
+    currentFile = name;
+    tableData = [["項目", "列1"], ["", ""]];
+
+    await window.saveFile(name, tableData, currentFolder);
+
+    setView("table");
+  }
+
+  if (view === "table") {
+
+    await window.saveFile(currentFile, tableData, currentFolder);
+  }
+};
+
+/* =========================
+   初期化
+========================= */
+async function init() {
+
+  setView("folder");
+
+  const folders = await window.getFolderNames();
+  renderFolderList(folders);
+
+  renderNav();
 }
 
 /* =========================
    フォルダ一覧
 ========================= */
-async function refreshFolders() {
+function renderFolderList(folders) {
 
-  const select =
-    document.getElementById(
-      "folderSelect"
-    );
+  const el = document.getElementById("folderView");
+  el.innerHTML = "";
 
-  select.innerHTML = "";
+  folders.forEach(f => {
 
-  let folders =
-    await window
-      .getFolderNames();
+    const row = document.createElement("div");
+    row.className = "ios-row";
+    row.textContent = "📁 " + f;
 
-  if (
-    !folders.includes("default")
-  ) {
+    row.onclick = async () => {
 
-    folders.unshift("default");
+      currentFolder = f;
 
-  }
+      await loadFiles();
 
-  const visibleFolders =
-    folders.filter(folder => {
+      setView("file");
+    };
 
-      if (currentFolder === "default") {
-
-        return (
-          folder !== "default" &&
-          !folder.includes("/")
-        );
-
-      }
-
-      return (
-
-        folder.startsWith(
-          currentFolder + "/"
-        )
-
-        &&
-
-        folder
-          .replace(
-            currentFolder + "/",
-            ""
-          )
-          .split("/")
-          .length === 1
-
-      );
-
-    });
-
-  if (currentFolder === "default") {
-
-    const opt =
-      document.createElement("option");
-
-    opt.value = "default";
-    opt.textContent = "default";
-
-    select.appendChild(opt);
-
-  }
-
-  visibleFolders.forEach(folder => {
-
-    const opt =
-      document.createElement("option");
-
-    opt.value = folder;
-
-    opt.textContent =
-      folder.split("/").pop();
-
-    select.appendChild(opt);
-
+    el.appendChild(row);
   });
-
-  select.value =
-    currentFolder;
-
-  updateCurrentPath();
-
 }
 
 /* =========================
-   ファイル一覧
+   ファイル読み込み
 ========================= */
-async function refreshFiles() {
+async function loadFiles() {
 
-  const select =
-    document.getElementById(
-      "fileSelect"
-    );
+  const el = document.getElementById("fileView");
+  el.innerHTML = "";
 
-  select.innerHTML = "";
-
-  let files =
-    await window.getFileNamesByFolder(
-      currentFolder
-    );
-
-  files =
-    files.filter(
-      name => name !== "_folder_init"
-    );
+  let files = await window.getFileNamesByFolder(currentFolder);
+  files = files.filter(f => f !== "_folder_init");
 
   if (files.length === 0) {
 
-    tableData = [
-      ["項目", "列1"],
-      ["", ""]
-    ];
-
+    tableData = [["項目", "列1"], ["", ""]];
+    currentFile = "";
+    setView("table");
     renderTable(tableData);
-
-    currentFileName = "";
-
     return;
-
   }
 
-  files.forEach(name => {
+  files.forEach(f => {
 
-    const opt =
-      document.createElement("option");
+    const row = document.createElement("div");
+    row.className = "ios-row";
+    row.textContent = "📄 " + f;
 
-    opt.value = name;
-    opt.textContent = name;
+    row.onclick = async () => {
 
-    select.appendChild(opt);
+      currentFile = f;
+      tableData = await window.loadFile(f);
 
+      if (!tableData) {
+        tableData = [["項目", "列1"], ["", ""]];
+      }
+
+      setView("table");
+      renderTable(tableData);
+    };
+
+    el.appendChild(row);
   });
-
-  currentFileName =
-    files[0];
-
-  select.value =
-    currentFileName;
-
-  tableData =
-    await window.loadFile(
-      currentFileName
-    );
-
-  if (!tableData) {
-
-    tableData = [
-      ["項目", "列1"],
-      ["", ""]
-    ];
-
-  }
-
-  renderTable(tableData);
-
 }
-
-/* =========================
-   フォルダ追加
-========================= */
-document
-  .getElementById("newFolderButton")
-  .onclick = async () => {
-
-    const name =
-      prompt("フォルダ名");
-
-    if (!name)
-      return;
-
-    currentFolder = name;
-
-    await window.saveFile(
-      "_folder_init",
-      [["項目", "列1"], ["", ""]],
-      currentFolder
-    );
-
-    await refreshFolders();
-    await refreshFiles();
-
-  };
-
-/* =========================
-   子フォルダ追加
-========================= */
-document
-  .getElementById("newSubFolderButton")
-  .onclick = async () => {
-
-    const name =
-      prompt("子フォルダ名");
-
-    if (!name)
-      return;
-
-    currentFolder =
-      currentFolder + "/" + name;
-
-    await window.saveFile(
-      "_folder_init",
-      [["項目", "列1"], ["", ""]],
-      currentFolder
-    );
-
-    await refreshFolders();
-    await refreshFiles();
-
-  };
-
-/* =========================
-   戻る
-========================= */
-document
-  .getElementById("backFolderButton")
-  .onclick = async () => {
-
-    if (currentFolder === "default")
-      return;
-
-    const split =
-      currentFolder.split("/");
-
-    split.pop();
-
-    currentFolder =
-      split.length === 0
-        ? "default"
-        : split.join("/");
-
-    await refreshFolders();
-    await refreshFiles();
-
-  };
-
-/* =========================
-   フォルダ削除
-========================= */
-document
-  .getElementById("deleteFolderButton")
-  .onclick = async () => {
-
-    if (currentFolder === "default") {
-
-      alert("defaultは削除不可");
-      return;
-
-    }
-
-    const ok =
-      confirm(
-        currentFolder + " を削除しますか？"
-      );
-
-    if (!ok)
-      return;
-
-    await window.deleteFolder(currentFolder);
-
-    const split =
-      currentFolder.split("/");
-
-    split.pop();
-
-    currentFolder =
-      split.length === 0
-        ? "default"
-        : split.join("/");
-
-    await refreshFolders();
-    await refreshFiles();
-
-  };
-
-/* =========================
-   フォルダ変更
-========================= */
-document
-  .getElementById("folderSelect")
-  .onchange = async (e) => {
-
-    currentFolder =
-      normalizeFolder(e.target.value);
-
-    await refreshFolders();
-    await refreshFiles();
-
-  };
-
-/* =========================
-   新規ファイル
-========================= */
-document
-  .getElementById("newFileButton")
-  .onclick = async () => {
-
-    const name =
-      prompt("ファイル名");
-
-    if (!name)
-      return;
-
-    currentFileName = name;
-
-    tableData = [
-      ["項目", "列1"],
-      ["", ""]
-    ];
-
-    await window.saveFile(
-      name,
-      tableData,
-      currentFolder
-    );
-
-    await refreshFiles();
-
-  };
 
 /* =========================
    保存
 ========================= */
-document
-  .getElementById("saveButton")
-  .onclick = async () => {
+document.getElementById("actionBtn").addEventListener("dblclick", async () => {
 
-    if (!currentFileName)
-      return;
+  if (view !== "table") return;
 
-    await window.saveFile(
-      currentFileName,
-      tableData,
-      currentFolder
-    );
-
-    console.log("保存完了");
-
-  };
+  await window.saveFile(currentFile, tableData, currentFolder);
+});
 
 /* =========================
-   ファイル削除
+   編集系
 ========================= */
-document
-  .getElementById("deleteFileButton")
-  .onclick = async () => {
+document.getElementById("addRowButton")?.addEventListener("click", () => {
+  addNewRow(tableData);
+  renderTable(tableData);
+});
 
-    if (!currentFileName)
-      return;
+document.getElementById("deleteRowButton")?.addEventListener("click", () => {
+  deleteLastRow(tableData);
+  renderTable(tableData);
+});
 
-    await window.deleteFile(currentFileName);
+document.getElementById("addColumnButton")?.addEventListener("click", () => {
+  addNewColumn(tableData);
+  renderTable(tableData);
+});
 
-    await refreshFiles();
+document.getElementById("deleteColumnButton")?.addEventListener("click", () => {
+  deleteLastColumn(tableData);
+  renderTable(tableData);
+});
 
-  };
-
-/* =========================
-   ファイル切替
-========================= */
-document
-  .getElementById("fileSelect")
-  .onchange = async (e) => {
-
-    currentFileName = e.target.value;
-
-    tableData =
-      await window.loadFile(currentFileName);
-
-    if (!tableData) {
-
-      tableData = [
-        ["項目", "列1"],
-        ["", ""]
-      ];
-
-    }
-
-    renderTable(tableData);
-
-  };
-
-/* =========================
-   行追加
-========================= */
-document
-  .getElementById("addRowButton")
-  .onclick = () => {
-
-    addNewRow(tableData);
-    renderTable(tableData);
-
-  };
-
-/* =========================
-   行削除
-========================= */
-document
-  .getElementById("deleteRowButton")
-  .onclick = () => {
-
-    deleteLastRow(tableData);
-    renderTable(tableData);
-
-  };
-
-/* =========================
-   列追加
-========================= */
-document
-  .getElementById("addColumnButton")
-  .onclick = () => {
-
-    addNewColumn(tableData);
-    renderTable(tableData);
-
-  };
-
-/* =========================
-   列削除
-========================= */
-document
-  .getElementById("deleteColumnButton")
-  .onclick = () => {
-
-    deleteLastColumn(tableData);
-    renderTable(tableData);
-
-  };
-
-/* =========================
-   自動保存
-========================= */
-document.addEventListener(
-  "input",
-  async () => {
-
-    if (!currentFileName)
-      return;
-
-    await window.autoSaveFile(
-      currentFileName,
-      tableData,
-      currentFolder
-    );
-
-  }
-);
-
-console.log("app.js loaded");
+console.log("iOS UI app.js loaded");

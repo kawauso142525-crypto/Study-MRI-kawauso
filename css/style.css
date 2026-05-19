@@ -1,20 +1,26 @@
 body {
 
-  font-family:
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
 
-  background:
-    #f5f5f5;
+  background: #f5f5f5;
 
-  margin:
-    0;
+  margin: 0;
 
-  padding:
-    16px;
+  padding: 16px;
 
-  color:
-    #222;
+  color: #222;
 
+  -webkit-text-size-adjust: 100%;
+
+  -webkit-tap-highlight-color: transparent;
+
+  overscroll-behavior: none;
+
+  -webkit-user-select: none;
+
+  user-select: none;
+
+  touch-action: manipulation;
 }
 
 /* =========================
@@ -22,18 +28,15 @@ body {
 ========================= */
 h1 {
 
-  margin-top:
-    0;
+  margin-top: 0;
 
-  margin-bottom:
-    20px;
+  margin-bottom: 20px;
 
-  font-size:
-    28px;
+  font-size: 28px;
 
-  font-weight:
-    bold;
+  font-weight: 700;
 
+  letter-spacing: 0.5px;
 }
 
 /* =========================
@@ -41,15 +44,11 @@ h1 {
 ========================= */
 .appLayout {
 
-  display:
-    flex;
+  display: flex;
 
-  gap:
-    20px;
+  gap: 20px;
 
-  align-items:
-    flex-start;
-
+  align-items: flex-start;
 }
 
 /* =========================
@@ -57,12 +56,9 @@ h1 {
 ========================= */
 .sidebar {
 
-  width:
-    320px;
+  width: 320px;
 
-  flex-shrink:
-    0;
-
+  flex-shrink: 0;
 }
 
 /* =========================
@@ -70,40 +66,27 @@ h1 {
 ========================= */
 .mainContent {
 
-  flex:
-    1;
+  flex: 1;
 
-  min-width:
-    0;
-
+  min-width: 0;
 }
 
 /* =========================
-   PANEL
+   PANEL（iOSカード化強化）
 ========================= */
 .panel {
 
-  background:
-    white;
+  background: white;
 
-  border-radius:
-    14px;
+  border-radius: 16px;
 
-  padding:
-    16px;
+  padding: 16px;
 
-  margin-bottom:
-    18px;
+  margin-bottom: 18px;
 
-  box-shadow:
-    0 2px 10px
-    rgba(
-      0,
-      0,
-      0,
-      0.08
-    );
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 
+  transition: 0.2s ease;
 }
 
 /* =========================
@@ -111,15 +94,13 @@ h1 {
 ========================= */
 .panel h2 {
 
-  margin-top:
-    0;
+  margin-top: 0;
 
-  margin-bottom:
-    14px;
+  margin-bottom: 14px;
 
-  font-size:
-    18px;
+  font-size: 18px;
 
+  font-weight: 600;
 }
 
 /* =========================
@@ -127,65 +108,55 @@ h1 {
 ========================= */
 .buttonRow {
 
-  display:
-    flex;
+  display: flex;
 
-  flex-wrap:
-    wrap;
+  flex-wrap: wrap;
 
-  gap:
-    10px;
+  gap: 10px;
 
-  margin-bottom:
-    14px;
-
+  margin-bottom: 14px;
 }
 
 /* =========================
-   BUTTON
+   BUTTON（iOS感強化）
 ========================= */
 button {
 
-  border:
-    none;
+  border: none;
 
-  border-radius:
-    8px;
+  border-radius: 12px;
 
-  padding:
-    10px 14px;
+  padding: 12px 14px;
 
-  cursor:
-    pointer;
+  cursor: pointer;
 
-  background:
-    #1976d2;
+  background: #1976d2;
 
-  color:
-    white;
+  color: white;
 
-  font-size:
-    14px;
+  font-size: 14px;
 
-  font-weight:
-    500;
+  font-weight: 600;
 
-  transition:
-    0.2s;
+  transition: 0.15s ease;
 
-  touch-action:
-    manipulation;
+  touch-action: manipulation;
 
+  -webkit-tap-highlight-color: transparent;
 }
 
-button:hover {
+/* hoverはPCのみ */
+@media (hover: hover) {
+  button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+}
 
-  opacity:
-    0.9;
-
-  transform:
-    translateY(-1px);
-
+/* iOS押下感 */
+button:active {
+  transform: scale(0.98);
+  opacity: 0.85;
 }
 
 /* =========================
@@ -195,20 +166,14 @@ button:hover {
 #deleteFolderButton,
 #deleteRowButton,
 #deleteColumnButton {
-
-  background:
-    #d32f2f;
-
+  background: #d32f2f;
 }
 
 /* =========================
    BACK BUTTON
 ========================= */
 #backFolderButton {
-
-  background:
-    #616161;
-
+  background: #616161;
 }
 
 /* =========================
@@ -217,37 +182,21 @@ button:hover {
 input,
 select {
 
-  width:
-    100%;
+  width: 100%;
 
-  box-sizing:
-    border-box;
+  box-sizing: border-box;
 
-  padding:
-    10px;
+  padding: 10px;
 
-  border:
-    1px solid #ccc;
+  border: 1px solid #ccc;
 
-  border-radius:
-    8px;
+  border-radius: 10px;
 
-  font-size:
-    14px;
+  font-size: 14px;
 
-  background:
-    white;
+  background: white;
 
-}
-
-/* =========================
-   SELECT
-========================= */
-select {
-
-  cursor:
-    pointer;
-
+  outline: none;
 }
 
 /* =========================
@@ -255,15 +204,13 @@ select {
 ========================= */
 #userInfo {
 
-  font-size:
-    14px;
+  font-size: 14px;
 
-  color:
-    #444;
+  color: #444;
 
-  word-break:
-    break-all;
+  word-break: break-all;
 
+  line-height: 1.4;
 }
 
 /* =========================
@@ -271,27 +218,19 @@ select {
 ========================= */
 #currentPath {
 
-  margin-top:
-    10px;
+  margin-top: 10px;
 
-  font-size:
-    13px;
+  font-size: 13px;
 
-  color:
-    #666;
+  color: #666;
 
-  word-break:
-    break-all;
+  word-break: break-all;
 
-  background:
-    #fafafa;
+  background: #fafafa;
 
-  padding:
-    8px;
+  padding: 8px;
 
-  border-radius:
-    8px;
-
+  border-radius: 10px;
 }
 
 /* =========================
@@ -299,15 +238,13 @@ select {
 ========================= */
 .table-wrapper {
 
-  overflow-x:
-    auto;
+  overflow-x: auto;
 
-  width:
-    100%;
+  width: 100%;
 
-  border-radius:
-    10px;
+  border-radius: 12px;
 
+  -webkit-overflow-scrolling: touch;
 }
 
 /* =========================
@@ -315,18 +252,13 @@ select {
 ========================= */
 table {
 
-  border-collapse:
-    collapse;
+  border-collapse: collapse;
 
-  width:
-    100%;
+  width: 100%;
 
-  min-width:
-    700px;
+  min-width: 700px;
 
-  background:
-    white;
-
+  background: white;
 }
 
 /* =========================
@@ -335,18 +267,13 @@ table {
 th,
 td {
 
-  border:
-    1px solid #ddd;
+  border: 1px solid #ddd;
 
-  padding:
-    8px;
+  padding: 8px;
 
-  text-align:
-    center;
+  text-align: center;
 
-  min-width:
-    120px;
-
+  min-width: 120px;
 }
 
 /* =========================
@@ -354,12 +281,9 @@ td {
 ========================= */
 th {
 
-  background:
-    #f0f4ff;
+  background: #f0f4ff;
 
-  font-weight:
-    bold;
-
+  font-weight: 600;
 }
 
 /* =========================
@@ -367,152 +291,115 @@ th {
 ========================= */
 td input {
 
-  border:
-    none;
+  border: none;
 
-  outline:
-    none;
+  outline: none;
 
-  width:
-    100%;
+  width: 100%;
 
-  background:
-    transparent;
+  background: transparent;
 
-  padding:
-    6px;
+  padding: 6px;
 
-  font-size:
-    14px;
-
+  font-size: 14px;
 }
 
 /* =========================
    FOCUS
 ========================= */
 td input:focus {
-
-  background:
-    #fffde7;
-
+  background: #fffde7;
 }
 
 /* =========================
-   FOLDER TREE（追加UI対応）
+   FOLDER TREE（軽量改善）
 ========================= */
 #folderTree {
 
-  margin-top:
-    10px;
+  margin-top: 10px;
 
-  padding:
-    10px;
+  padding: 10px;
 
-  background:
-    #fafafa;
+  background: #fafafa;
 
-  border:
-    1px solid #eee;
+  border: 1px solid #eee;
 
-  border-radius:
-    8px;
+  border-radius: 10px;
 
-  font-size:
-    13px;
+  font-size: 13px;
 
-  color:
-    #555;
+  color: #555;
 
-  max-height:
-    200px;
+  max-height: 220px;
 
-  overflow-y:
-    auto;
+  overflow-y: auto;
 
+  line-height: 1.6;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ツリー行 */
+#folderTree div {
+  padding: 8px 6px;
+
+  border-bottom: 1px solid #eee;
+
+  cursor: pointer;
+}
+
+#folderTree div:active {
+  background: #e3f2fd;
 }
 
 /* =========================
    MOBILE
 ========================= */
-@media (
-  max-width: 768px
-) {
+@media (max-width: 768px) {
 
   body {
-
-    padding:
-      10px;
-
+    padding: 10px;
   }
 
   h1 {
-
-    font-size:
-      24px;
-
+    font-size: 24px;
   }
 
   .appLayout {
-
-    flex-direction:
-      column;
-
+    flex-direction: column;
   }
 
-  .sidebar {
-
-    width:
-      100%;
-
-  }
-
+  .sidebar,
   .mainContent {
-
-    width:
-      100%;
-
+    width: 100%;
   }
 
   .panel {
-
-    padding:
-      12px;
-
+    padding: 12px;
+    border-radius: 14px;
   }
 
   button {
 
-    flex:
-      1 1 auto;
+    flex: 1 1 auto;
 
-    min-width:
-      120px;
+    min-width: 120px;
 
-    font-size:
-      14px;
+    font-size: 15px;
 
-    padding:
-      12px;
-
+    padding: 14px;
   }
 
   th,
   td {
-
-    min-width:
-      140px;
-
+    min-width: 140px;
   }
 
   input,
   select {
 
-    font-size:
-      16px;
+    font-size: 16px;
 
-    padding:
-      12px;
-
+    padding: 12px;
   }
-
 }

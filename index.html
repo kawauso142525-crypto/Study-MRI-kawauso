@@ -2,186 +2,58 @@
 <html lang="ja">
 
 <head>
-
   <meta charset="UTF-8" />
-
-  <meta
-    name="viewport"
-    content="
-      width=device-width,
-      initial-scale=1.0
-    "
-  />
-
-  <title>
-    Table Manager
-  </title>
-
-  <link
-    rel="stylesheet"
-    href="style.css"
-  />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Table Manager</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
-  <!-- TITLE -->
-  <h1>
-    Table Manager
-  </h1>
+  <!-- =========================
+       NAV BAR（iOSコア）
+  ========================== -->
+  <div id="navBar">
 
-  <!-- APP LAYOUT -->
-  <div class="appLayout">
+    <button id="backBtn">←</button>
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
+    <div id="title">Table Manager</div>
 
-      <!-- LOGIN PANEL -->
-      <div class="panel">
-
-        <h2>
-          ログイン
-        </h2>
-
-        <div class="buttonRow">
-
-          <button id="loginButton">
-            Googleログイン
-          </button>
-
-        </div>
-
-        <div id="userInfo">
-        </div>
-
-      </div>
-
-      <!-- FOLDER PANEL -->
-      <div class="panel">
-
-        <h2>
-          フォルダ
-        </h2>
-
-        <div class="buttonRow">
-
-          <button id="backFolderButton">
-            ← 戻る
-          </button>
-
-          <button id="newFolderButton">
-            新規フォルダ
-          </button>
-
-          <button id="newSubFolderButton">
-            子フォルダ
-          </button>
-
-          <button id="deleteFolderButton">
-            フォルダ削除
-          </button>
-
-        </div>
-
-        <!-- TREE UI -->
-        <div id="folderTree">
-        </div>
-
-        <!-- EXISTING SELECT -->
-        <select id="folderSelect">
-        </select>
-
-        <div id="currentPath">
-        </div>
-
-      </div>
-
-      <!-- FILE PANEL -->
-      <div class="panel">
-
-        <h2>
-          ファイル
-        </h2>
-
-        <div class="buttonRow">
-
-          <button id="newFileButton">
-            新規ファイル
-          </button>
-
-          <button id="saveButton">
-            保存
-          </button>
-
-          <button id="deleteFileButton">
-            ファイル削除
-          </button>
-
-        </div>
-
-        <select id="fileSelect">
-        </select>
-
-      </div>
-
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div class="mainContent">
-
-      <!-- TABLE PANEL -->
-      <div class="panel">
-
-        <h2>
-          テーブル
-        </h2>
-
-        <div class="buttonRow">
-
-          <button id="addRowButton">
-            行追加
-          </button>
-
-          <button id="deleteRowButton">
-            行削除
-          </button>
-
-          <button id="addColumnButton">
-            列追加
-          </button>
-
-          <button id="deleteColumnButton">
-            列削除
-          </button>
-
-        </div>
-
-        <div class="table-wrapper">
-
-          <div id="tableContainer">
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
+    <button id="actionBtn">＋</button>
 
   </div>
 
-  <!-- JS -->
-  <script
-    type="module"
-    src="firebase.js"
-  ></script>
+  <!-- =========================
+       FOLDER VIEW
+  ========================== -->
+  <div id="folderView"></div>
 
+  <!-- =========================
+       FILE VIEW
+  ========================== -->
+  <div id="fileView" style="display:none;"></div>
+
+  <!-- =========================
+       TABLE VIEW
+  ========================== -->
+  <div id="tableView" style="display:none;">
+
+    <div id="tableContainer"></div>
+
+  </div>
+
+  <!-- =========================
+       FIREBASE
+  ========================== -->
+  <script type="module" src="firebase.js"></script>
+
+  <!-- STORAGE -->
   <script src="storage.js"></script>
 
+  <!-- TABLE -->
   <script src="table.js"></script>
 
-  <script src="suggestion.js"></script>
-
+  <!-- APP -->
   <script src="app.js"></script>
 
 </body>

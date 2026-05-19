@@ -1,64 +1,40 @@
 function renderTable(tableData) {
 
   const container =
-    document.getElementById(
-      "tableContainer"
-    );
+    document.getElementById("tableContainer");
+
+  if (!container) return;
 
   container.innerHTML = "";
 
   const table =
-    document.createElement(
-      "table"
-    );
+    document.createElement("table");
 
-  tableData.forEach((
-    row,
-    rowIndex
-  ) => {
+  tableData = tableData || [];
 
-    const tr =
-      document.createElement(
-        "tr"
-      );
+  tableData.forEach((row, rowIndex) => {
 
-    row.forEach((
-      cell,
-      colIndex
-    ) => {
+    const tr = document.createElement("tr");
 
-      const td =
-        document.createElement(
-          "td"
-        );
+    (row || []).forEach((cell, colIndex) => {
 
-      const input =
-        document.createElement(
-          "input"
-        );
+      const td = document.createElement("td");
 
-      input.value = cell;
+      const input = document.createElement("input");
 
-      input.addEventListener(
+      input.value = cell ?? "";
 
-        "input",
+      input.addEventListener("input", (e) => {
 
-        (e) => {
+        tableData[rowIndex][colIndex] = e.target.value;
 
-          tableData[rowIndex][colIndex]
-            = e.target.value;
-
-          saveSuggestion(
-            rowIndex,
-            e.target.value
-          );
-
+        if (typeof saveSuggestion === "function") {
+          saveSuggestion(rowIndex + 1, e.target.value);
         }
 
-      );
+      });
 
       td.appendChild(input);
-
       tr.appendChild(td);
 
     });
@@ -68,7 +44,6 @@ function renderTable(tableData) {
   });
 
   container.appendChild(table);
-
 }
 
 /* =========================
@@ -76,14 +51,13 @@ function renderTable(tableData) {
 ========================= */
 function addNewRow(tableData) {
 
-  const colCount =
-    tableData[0].length;
+  if (!tableData?.length) return;
 
-  const newRow =
-    Array(colCount).fill("");
+  const colCount = tableData[0].length;
+
+  const newRow = Array(colCount).fill("");
 
   tableData.push(newRow);
-
 }
 
 /* =========================
@@ -91,10 +65,10 @@ function addNewRow(tableData) {
 ========================= */
 function addNewColumn(tableData) {
 
+  if (!tableData?.length) return;
+
   tableData.forEach(row => {
-
     row.push("");
-
   });
 
 }
@@ -104,11 +78,9 @@ function addNewColumn(tableData) {
 ========================= */
 function deleteLastRow(tableData) {
 
-  if (tableData.length <= 1)
-    return;
+  if (!tableData || tableData.length <= 1) return;
 
   tableData.pop();
-
 }
 
 /* =========================
@@ -116,13 +88,9 @@ function deleteLastRow(tableData) {
 ========================= */
 function deleteLastColumn(tableData) {
 
-  if (tableData[0].length <= 1)
-    return;
+  if (!tableData?.[0] || tableData[0].length <= 1) return;
 
   tableData.forEach(row => {
-
     row.pop();
-
   });
-
 }

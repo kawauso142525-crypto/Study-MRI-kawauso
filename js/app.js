@@ -169,7 +169,6 @@ async function refreshFiles() {
         name !== "_folder_init"
     );
 
-  /* ファイル0件 */
   if (
     files.length === 0
   ) {
@@ -258,7 +257,6 @@ document
     currentFolder =
       name;
 
-    /* ダミーファイル */
     await window.saveFile(
 
       "_folder_init",
@@ -282,258 +280,45 @@ document
   };
 
 /* =========================
-   フォルダ変更
+   子フォルダ追加
 ========================= */
 document
   .getElementById(
-    "folderSelect"
-  )
-  .onchange = async (e) => {
-
-    currentFolder =
-      e.target.value;
-
-    await refreshFiles();
-
-  };
-
-/* =========================
-   新規ファイル
-========================= */
-document
-  .getElementById(
-    "newFileButton"
+    "newSubFolderButton"
   )
   .onclick = async () => {
 
     const name =
       prompt(
-        "ファイル名"
+        "子フォルダ名"
       );
 
     if (!name)
       return;
 
-    currentFileName =
-      name;
-
-    tableData = [
-
-      ["項目", "列1"],
-
-      ["", ""]
-
-    ];
+    currentFolder =
+      currentFolder
+      + "/"
+      + name;
 
     await window.saveFile(
 
-      name,
+      "_folder_init",
 
-      tableData,
-
-      currentFolder
-
-    );
-
-    await refreshFiles();
-
-    renderTable(
-      tableData
-    );
-
-  };
-
-/* =========================
-   保存
-========================= */
-document
-  .getElementById(
-    "saveButton"
-  )
-  .onclick = async () => {
-
-    if (
-      !currentFileName
-    )
-      return;
-
-    await window.saveFile(
-
-      currentFileName,
-
-      tableData,
-
-      currentFolder
-
-    );
-
-    console.log(
-      "保存完了"
-    );
-
-  };
-
-/* =========================
-   ファイル削除
-========================= */
-document
-  .getElementById(
-    "deleteFileButton"
-  )
-  .onclick = async () => {
-
-    if (
-      !currentFileName
-    )
-      return;
-
-    await window.deleteFile(
-      currentFileName
-    );
-
-    await refreshFiles();
-
-  };
-
-/* =========================
-   ファイル切替
-========================= */
-document
-  .getElementById(
-    "fileSelect"
-  )
-  .onchange = async (e) => {
-
-    currentFileName =
-      e.target.value;
-
-    tableData =
-      await window.loadFile(
-        currentFileName
-      );
-
-    if (!tableData) {
-
-      tableData = [
+      [
 
         ["項目", "列1"],
 
         ["", ""]
 
-      ];
-
-    }
-
-    renderTable(
-      tableData
-    );
-
-  };
-
-/* =========================
-   行追加
-========================= */
-document
-  .getElementById(
-    "addRowButton"
-  )
-  .onclick = () => {
-
-    addNewRow(
-      tableData
-    );
-
-    renderTable(
-      tableData
-    );
-
-  };
-
-/* =========================
-   行削除
-========================= */
-document
-  .getElementById(
-    "deleteRowButton"
-  )
-  .onclick = () => {
-
-    deleteLastRow(
-      tableData
-    );
-
-    renderTable(
-      tableData
-    );
-
-  };
-
-/* =========================
-   列追加
-========================= */
-document
-  .getElementById(
-    "addColumnButton"
-  )
-  .onclick = () => {
-
-    addNewColumn(
-      tableData
-    );
-
-    renderTable(
-      tableData
-    );
-
-  };
-
-/* =========================
-   列削除
-========================= */
-document
-  .getElementById(
-    "deleteColumnButton"
-  )
-  .onclick = () => {
-
-    deleteLastColumn(
-      tableData
-    );
-
-    renderTable(
-      tableData
-    );
-
-  };
-
-/* =========================
-   自動保存
-========================= */
-document.addEventListener(
-
-  "input",
-
-  async () => {
-
-    if (
-      !currentFileName
-    )
-      return;
-
-    await window.autoSaveFile(
-
-      currentFileName,
-
-      tableData,
+      ],
 
       currentFolder
 
     );
 
-  }
+    await refreshFolders();
 
-);
+    await refreshFiles();
 
-console.log(
-  "app.js loaded"
-);
+  };
